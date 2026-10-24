@@ -58,8 +58,13 @@ returns to its previous state. Full package documentation is available at
 ## Development workflow
 
 Changes to code and general documentation go through `master` and are merged
-into `debian/jammy`. Changes that only affect `debian/` are made directly on
-the `debian/jammy` branch.
+into the distribution branches:
+
+- `debian/jammy`: Ubuntu jammy.
+- `debian/noble`: Ubuntu noble.
+
+Changes that only affect `debian/` are made directly on the corresponding
+distribution branch.
 
 Typical flow:
 
@@ -67,7 +72,13 @@ Typical flow:
 git checkout master
 # edit code, tools, po/ or README files
 git commit
+
 git checkout debian/jammy
+git merge master
+# edit debian/ if needed
+git commit
+
+git checkout debian/noble
 git merge master
 # edit debian/ if needed
 git commit
