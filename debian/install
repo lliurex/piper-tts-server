@@ -1,0 +1,4 @@
+debian/piper-tts.service lib/systemd/system
+debian/piper-tts.socket lib/systemd/system
+debian/piper_sd.conf etc/speech-dispatcher/modules
+tools/piper-tts-test usr/bin

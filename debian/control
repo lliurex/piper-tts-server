@@ -1,0 +1,39 @@
+Source: piper-tts-server
+Section: sound
+Priority: optional
+Maintainer: M.Angel Juan <m.angel.juan@gmail.com>
+Build-Depends: debhelper-compat (= 13),
+               dh-sequence-python3,
+               pybuild-plugin-pyproject,
+               python3-all,
+               python3-setuptools,
+               gettext
+Standards-Version: 4.6.0
+Rules-Requires-Root: no
+
+Package: piper-tts-server
+Architecture: all
+Depends: python3,
+         gettext-base,
+         piper-tts (>= 1.8.0),
+         speech-dispatcher,
+         speech-dispatcher-espeak-ng,
+         pulseaudio-utils,
+         systemd,
+         ${python3:Depends},
+         ${misc:Depends}
+Recommends: piper-tts-voices-ar,
+            piper-tts-voices-ca,
+            piper-tts-voices-de,
+            piper-tts-voices-en,
+            piper-tts-voices-es,
+            piper-tts-voices-fr,
+            piper-tts-voices-it,
+            piper-tts-voices-ru
+Description: Piper TTS server over a Unix socket
+ Resident Piper TTS server and client with a per-voice LRU cache, raw PCM
+ audio streaming over a Unix socket, systemd socket activation and idle
+ auto-shutdown.
+ .
+ This package depends on piper-tts, speech-dispatcher, pulseaudio-utils and
+ systemd, and configures speech-dispatcher and systemd to use the server.

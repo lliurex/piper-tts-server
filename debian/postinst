@@ -1,0 +1,39 @@
+#!/bin/sh
+set -e
+
+#DEBHELPER#
+
+SPEECHD_CONF=/etc/speech-dispatcher/speechd.conf
+MODULE_CONF=/etc/speech-dispatcher/modules/piper_sd.conf
+MODULE_LINE='AddModule "piper" "sd_generic" "/etc/speech-dispatcher/modules/piper_sd.conf"'
+
+configure_speechd() {
+    [ -f "$SPEECHD_CONF" ] || return 0
+    [ -f "$MODULE_CONF" ] || return 0
+    if [ ! -f "$SPEECHD_CONF.bkp" ]; then
+        cp -a "$SPEECHD_CONF" "$SPEECHD_CONF.bkp"
+    fi
+    sed -i 's|^#AddModule "espeak-ng"|AddModule "espeak-ng"|' "$SPEECHD_CONF"
+    if grep -q '^AddModule "piper"' "$SPEECHD_CONF"; then
+        sed -i "s|^AddModule \"piper\".*|$MODULE_LINE|" "$SPEECHD_CONF"
+    elif grep -q '^#AddModule "piper"' "$SPEECHD_CONF"; then
+        sed -i "s|^#AddModule \"piper\".*|$MODULE_LINE|" "$SPEECHD_CONF"
+    else
+        printf '\n# Added by piper-tts-server\n%s\n' "$MODULE_LINE" >> "$SPEECHD_CONF"
+    fi
+    if grep -q '^DefaultModule' "$SPEECHD_CONF"; then
+        sed -i 's|^DefaultModule.*|DefaultModule piper|' "$SPEECHD_CONF"
+    elif grep -q '^#DefaultModule espeak-ng' "$SPEECHD_CONF"; then
+        sed -i 's|^#DefaultModule espeak-ng|DefaultModule piper|' "$SPEECHD_CONF"
+    else
+        printf 'DefaultModule piper\n' >> "$SPEECHD_CONF"
+    fi
+}
+
+case "$1" in
+    configure)
+        configure_speechd || true
+        ;;
+esac
+
+exit 0

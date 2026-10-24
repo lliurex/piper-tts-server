@@ -1,0 +1,7 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: piper-tts-server
+
+Files: *
+Copyright: 2026 M.Angel Juan <m.angel.juan@gmail.com>
+License: GPL-3+
+ GPL-3.0-or-later - https://www.gnu.org/licenses/gpl-3.0.html

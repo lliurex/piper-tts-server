@@ -1,0 +1,144 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: piper-tts-server 0.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-21 12:06+0200\n"
+"PO-Revision-Date: 2026-10-21 12:06+0200\n"
+"Last-Translator: M.Angel Juan <m.angel.juan@gmail.com>\n"
+"Language-Team: Valencian\n"
+"Language: ca\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "could not connect to %s: %s"
+msgstr "no s'ha pogut connectar amb %s: %s"
+
+msgid "empty response from server"
+msgstr "resposta buida del servidor"
+
+msgid "invalid response: %r"
+msgstr "resposta no vàlida: %r"
+
+msgid "paplay not found in PATH"
+msgstr "paplay no trobat en PATH"
+
+msgid "could not execute paplay: %s"
+msgstr "no s'ha pogut executar paplay: %s"
+
+msgid "piper-tts-client: timed out reading audio"
+msgstr "piper-tts-client: s'ha esgotat el temps d'espera llegint àudio"
+
+msgid "piper-tts-client: espeak-ng fallback not available"
+msgstr "piper-tts-client: fallback a espeak-ng no disponible"
+
+msgid "piper-tts-client: server and espeak-ng fallback not available"
+msgstr "piper-tts-client: servidor i fallback a espeak-ng no disponibles"
+
+msgid "piper-tts-client: espeak-ng fallback failed: %s"
+msgstr "piper-tts-client: fallback a espeak-ng ha fallat: %s"
+
+msgid "Client for piper-tts-server (speech-dispatcher or direct use)"
+msgstr "Client de piper-tts-server (speech-dispatcher o ús directe)"
+
+msgid "Text to synthesize (reads from stdin if omitted)"
+msgstr "Text a sintetitzar (es llig de stdin si s'omet)"
+
+msgid "Language code (ca, es, ...)"
+msgstr "Codi d'idioma (ca, es, ...)"
+
+msgid "Voice name (thorsten, lessac, upc_pau, ...; takes precedence over --lang)"
+msgstr "Nom de la veu (thorsten, lessac, upc_pau, ...; té prioritat sobre --lang)"
+
+msgid "Speed between -100 and +100"
+msgstr "Velocitat entre -100 i +100"
+
+msgid "Volume between -100 and +100 (0 = normal)"
+msgstr "Volum entre -100 i +100 (0 = normal)"
+
+msgid "Unix socket path"
+msgstr "Ruta del socket Unix"
+
+msgid "Write raw s16le PCM to stdout (no paplay)"
+msgstr "Escriu PCM s16le cru en stdout (sense paplay)"
+
+msgid "Do not use espeak-ng if the server does not respond"
+msgstr "No usar espeak-ng si el servidor no respon"
+
+msgid "Socket timeout in seconds"
+msgstr "Temps d'espera del socket en segons"
+
+msgid "piper-tts-client: %s"
+msgstr "piper-tts-client: %s"
+
+msgid "piper-tts-client: server unavailable, falling back to espeak-ng: %s"
+msgstr "piper-tts-client: servidor no disponible, usant fallback a espeak-ng: %s"
+
+msgid "piper-tts-client: server HTTP %s: %s"
+msgstr "piper-tts-client: HTTP del servidor %s: %s"
+
+msgid "piper-tts-client: falling back to espeak-ng (server HTTP %s: %s)"
+msgstr "piper-tts-client: usant fallback a espeak-ng (HTTP del servidor %s: %s)"
+
+msgid "Piper TTS server over a Unix socket with LRU cache and PCM streaming"
+msgstr "Servidor Piper TTS per socket Unix amb caché LRU i streaming PCM"
+
+msgid "Unix socket path (default $PIPER_SOCKET or /run/piper.sock)"
+msgstr "Ruta del socket Unix (per defecte $PIPER_SOCKET o /run/piper.sock)"
+
+msgid "Voices directory (default $PIPER_VOICES_DIR or /usr/share/piper-voices)"
+msgstr "Directori de veus (per defecte $PIPER_VOICES_DIR o /usr/share/piper-voices)"
+
+msgid "Idle seconds before exiting (default $PIPER_IDLE_SECONDS)"
+msgstr "Segons d'inactivitat abans d'eixir (per defecte $PIPER_IDLE_SECONDS)"
+
+msgid "Maximum voices in LRU cache (default $PIPER_MAX_LANGUAGES)"
+msgstr "Màxim de veus en caché LRU (per defecte $PIPER_MAX_LANGUAGES)"
+
+msgid "usage: %s [language|all] [text] [-v|--voice NAME] [-d|--debug]"
+msgstr "ús: %s [idioma|all] [text] [-v|--voice NOM] [-d|--debug]"
+
+msgid "  -v, --voice NAME    test that specific voice (thorsten, pau, upc_pau, ...)"
+msgstr "  -v, --voice NOM    prova eixa veu concreta (thorsten, pau, upc_pau, ...)"
+
+msgid "  -d, --debug          show piper-tts.service journal messages"
+msgstr "  -d, --debug          mostra els missatges del journal de piper-tts.service"
+
+msgid "test the Piper voices installed in %s"
+msgstr "prova les veus Piper instal·lades en %s"
+
+msgid "WARNING: journalctl not found; server messages will not be shown"
+msgstr "AVÍS: no s'ha trobat journalctl; no es mostraran els missatges del servidor"
+
+msgid "WARNING: could not read the piper-tts.service journal"
+msgstr "AVÍS: no s'ha pogut llegir el journal de piper-tts.service"
+
+msgid "ERROR: language not installed: %s"
+msgstr "ERROR: idioma no instal·lat: %s"
+
+msgid "ERROR: %s did not play"
+msgstr "ERROR: %s no s'ha reproduït"
+
+msgid "WARNING: no voices installed in %s"
+msgstr "AVÍS: no hi ha veus instal·lades en %s"
+
+msgid "install piper-tts-voices-* packages or copy .onnx and .onnx.json files"
+msgstr "instal·la els paquets piper-tts-voices-* o copia els fitxers .onnx i .onnx.json"
+
+msgid "WARNING: voice not installed: %s (check spd-say -L or %s)"
+msgstr "AVÍS: veu no instal·lada: %s (consulta spd-say -L o %s)"
+
+msgid "WARNING: language not installed: %s (available: %s)"
+msgstr "AVÍS: idioma no instal·lat: %s (disponibles: %s)"
+
+msgid "OK: voice %s tested"
+msgstr "OK: veu %s provada"
+
+msgid "ERROR: voice %s failed"
+msgstr "ERROR: la veu %s ha fallat"
+
+msgid "OK: test completed (%s voices installed)"
+msgstr "OK: prova completada (%s veus instal·lades)"
+
+msgid "ERROR: some voice failed"
+msgstr "ERROR: alguna veu ha fallat"

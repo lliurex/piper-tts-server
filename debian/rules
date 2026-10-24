@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --buildsystem=pybuild
+
+override_dh_auto_install:
+	dh_auto_install
+	for lang in $$(sed -e 's/#.*//' -e '/^$$/d' po/LINGUAS); do \
+		install -d debian/piper-tts-server/usr/share/locale/$$lang/LC_MESSAGES; \
+		msgfmt --check --check-format -o debian/piper-tts-server/usr/share/locale/$$lang/LC_MESSAGES/piper-tts-server.mo po/$$lang.po; \
+	done
+
+override_dh_auto_test:
+	true

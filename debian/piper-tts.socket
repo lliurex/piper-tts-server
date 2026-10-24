@@ -1,0 +1,11 @@
+[Unit]
+Description=Piper TTS server socket
+
+[Socket]
+ListenStream=/run/piper.sock
+SocketMode=0666
+FileDescriptorName=piper-tts.socket
+RemoveOnStop=true
+
+[Install]
+WantedBy=sockets.target

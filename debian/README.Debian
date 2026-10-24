@@ -1,0 +1,142 @@
+piper-tts-server for Debian/Ubuntu jammy
+========================================
+
+Dependency on piper-tts
+-----------------------
+This package depends on the Debian package piper-tts (>= 1.8.0), which
+provides the piper Python library, the /usr/bin/piper command and its
+dependencies (python3-onnxruntime, python3-numpy and python3-pathvalidate).
+No pip command is run and nothing is downloaded during installation.
+
+piper-tts must be available in the configured repository or installed
+previously. Removing piper-tts-server does not remove piper-tts, because it
+is an independent package and may be used by other software.
+
+This package also depends on speech-dispatcher, which provides the daemon
+and the sd_generic module used by the integration. It depends on
+pulseaudio-utils for paplay, on speech-dispatcher-espeak-ng for the
+espeak-ng fallback, and on systemd for the socket/service units and
+journalctl.
+
+A running PulseAudio or PipeWire sound server is still required for audio
+output; the package only installs the client tools.
+
+Voices
+------
+Voices are installed in /usr/share/piper-voices by the independent packages
+piper-tts-voices-{ar,ca,de,en,es,fr,it,ru} (piper-tts-voices repository, one
+branch per language, versioned independently). This package recommends them:
+
+    sudo apt install piper-tts-server                        # all
+    sudo apt install --no-install-recommends piper-tts-server  # none
+    sudo apt install piper-tts-server piper-tts-voices-ca piper-tts-voices-es  # some
+
+If those packages are not available in the configured repositories, apt
+skips them without error and the .onnx and .onnx.json files can be copied
+manually to /usr/share/piper-voices (PIPER_VOICES_DIR in the systemd unit).
+
+After installing or updating a voice, restart the server to discover it
+(or wait for it to exit after 900 s without use):
+
+    sudo systemctl restart piper-tts.service
+
+Configuration
+-------------
+The server is a system unit (piper-tts.service, activated by
+piper-tts.socket at /run/piper.sock). The unit sets all variables; they can
+be changed with a drop-in:
+
+    sudo systemctl edit piper-tts.service
+
+Environment variables set in the unit:
+- PIPER_SOCKET (/run/piper.sock): server Unix socket.
+- PIPER_VOICES_DIR (/usr/share/piper-voices): voices directory.
+- PIPER_IDLE_SECONDS (900): seconds without use before the server exits.
+- PIPER_MAX_LANGUAGES (2): maximum voices in the LRU cache.
+- PIPER_DEFAULT_LANG (auto): default language; auto derives it from the
+  system locale (LANG/LC_*). A specific code (ca, es, ...) is also accepted.
+- PIPER_SENTENCE_SILENCE (0.2): silence between sentences, in seconds.
+- PIPER_LOG_LEVEL (INFO): log level.
+
+The service runs as a systemd dynamic user (DynamicUser=yes) with
+NoNewPrivileges=yes; it only reads voices and accepts connections through
+the socket.
+
+Voice selection
+---------------
+speech-dispatcher allows selecting the voice by name; the package forwards
+it to the server (voice parameter) with precedence over the language:
+
+    spd-say -y thorsten "Hallo"   # German (thorsten)
+    spd-say -y pau "Hola"         # Catalan (alias for upc_pau)
+    spd-say -L                    # list available voices
+
+Names: kareem (ar), pau/upc_pau (ca), thorsten (de), lessac (en),
+sharvard (es), siwis (fr), paola (it), denis (ru). If the requested voice
+does not exist, the language is used; if that does not match either, the
+client falls back to espeak-ng (with a warning on stderr). Applications
+that set SET_SYNTHESIS_VOICE (Firefox, etc.) work the same way. Direct
+equivalent:
+
+    piper-tts-client --voice lessac --lang en
+
+Messages and translations
+-------------------------
+Source messages are in English. The client, piper-tts-test and the server
+command-line help use gettext, with catalogs installed in
+/usr/share/locale/{es,ca}/LC_MESSAGES/piper-tts-server.mo. The service
+journal remains in English so it is stable for debugging.
+
+The locale is taken from LANG/LC_*; for example:
+
+    LANG=es_ES.UTF-8 piper-tts-test --help
+    LANG=ca_ES@valencia piper-tts-test --help
+    LANG=C piper-tts-test --help
+
+To show the piper-tts.service journal while testing, use -d/--debug:
+
+    piper-tts-test -d
+    piper-tts-test -d -v thorsten
+
+The journal is shown with timestamped lines. Without -d, no journal output
+is produced.
+
+Backups and uninstallation
+--------------------------
+Before modifying the configuration, the package saves .bkp copies:
+
+- /etc/speech-dispatcher/speechd.conf.bkp: copy from before the first patch.
+- /etc/speech-dispatcher/modules/piper_sd.conf.bkp: copy of the previous file
+  if it already existed on first installation.
+
+Removing (dpkg -r) or purging (dpkg -P) the package restores those copies
+and leaves the configuration as it was before installing piper-tts-server.
+Note: restoring speechd.conf also reverts changes made after installation.
+
+Automatic integration
+---------------------
+- dh_installsystemd enables piper-tts.socket (system unit) and starts it;
+  the service is activated on demand. On each boot only the socket is
+  enabled.
+- postinst adds AddModule/DefaultModule for piper to
+  /etc/speech-dispatcher/speechd.conf (backup in speechd.conf.bkp) and
+  enables the espeak-ng module.
+- NOTE: a user file ~/.config/speech-dispatcher/speechd.conf takes
+  precedence over /etc; if it exists, adjust or remove it so the package
+  configuration applies. The package only manages the system configuration.
+
+Commands
+--------
+- /usr/bin/piper-tts-server: server (socket at /run/piper.sock).
+- /usr/bin/piper-tts-client: client (reads text from stdin, plays through
+  paplay; --voice option; libespeak-ng fallback if the server does not
+  respond).
+- /usr/bin/piper-tts-test: tests the installation by playing a phrase with
+  each installed voice (language, all; -v NAME for a specific voice; -d to
+  show the server journal; warns if no voice is available):
+
+      piper-tts-test              # all installed voices
+      piper-tts-test ca           # one voice
+      piper-tts-test es "Hola"    # custom text
+      piper-tts-test -v thorsten  # one specific voice
+      piper-tts-test -d           # all voices plus the journal

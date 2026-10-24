@@ -1,0 +1,19 @@
+[Unit]
+Description=Piper TTS server (LRU cache, PCM streaming)
+Requires=piper-tts.socket
+After=piper-tts.socket
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/piper-tts-server
+DynamicUser=yes
+NoNewPrivileges=yes
+Environment=PIPER_SOCKET=/run/piper.sock
+Environment=PIPER_VOICES_DIR=/usr/share/piper-voices
+Environment=PIPER_IDLE_SECONDS=900
+Environment=PIPER_MAX_LANGUAGES=2
+Environment=PIPER_SENTENCE_SILENCE=0.2
+Environment=PIPER_DEFAULT_LANG=auto
+Environment=PIPER_LOG_LEVEL=INFO
+TimeoutStopSec=10
+Restart=no

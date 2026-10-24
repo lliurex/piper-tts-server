@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+
+#DEBHELPER#
+
+MODULE_CONF=/etc/speech-dispatcher/modules/piper_sd.conf
+
+if [ "$1" = install ] && [ -z "${2:-}" ] && [ -e "$MODULE_CONF" ] && [ ! -e "$MODULE_CONF.bkp" ]; then
+    mv "$MODULE_CONF" "$MODULE_CONF.bkp"
+fi
+
+exit 0

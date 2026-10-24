@@ -1,0 +1,4 @@
+# the client is an internal CLI tool for speech-dispatcher, without a man page
+no-manual-page
+# license text intentionally omitted: only the SPDX identifier and URL are used
+copyright-not-using-common-license-for-gpl

@@ -1,0 +1,22 @@
+#!/bin/sh
+set -e
+
+#DEBHELPER#
+
+SPEECHD_CONF=/etc/speech-dispatcher/speechd.conf
+MODULE_CONF=/etc/speech-dispatcher/modules/piper_sd.conf
+
+restore() {
+    if [ -e "$1.bkp" ]; then
+        mv -f "$1.bkp" "$1"
+    fi
+}
+
+case "$1" in
+    remove|purge)
+        restore "$MODULE_CONF"
+        restore "$SPEECHD_CONF"
+        ;;
+esac
+
+exit 0
