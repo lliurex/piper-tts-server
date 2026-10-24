@@ -1,0 +1,230 @@
+#!/bin/bash
+set -u
+TEXTDOMAIN=piper-tts-server
+TEXTDOMAINDIR="${PIPER_LOCALEDIR:-/usr/share/locale}"
+export TEXTDOMAIN TEXTDOMAINDIR
+if ! command -v gettext >/dev/null 2>&1; then
+  gettext() { printf '%s' "$1"; }
+fi
+VOICES_DIR="${PIPER_VOICES_DIR:-/usr/share/piper-voices}"
+CLIENT=/usr/bin/piper-tts-client
+declare -A SAMPLE=(
+  [ca]="Hola, esta és la veu en valencià del servidor piper."
+  [es]="Hola, esta es la voz en español del servidor piper."
+  [de]="Hallo, das ist die deutsche Stimme des Piper-Servers."
+  [en]="Hello, this is the English voice of the piper server."
+  [fr]="Bonjour, ceci est la voix française du serveur piper."
+  [it]="Ciao, questa è la voce italiana del server piper."
+  [ru]="Привет, это русский голос сервера piper."
+  [ar]="مرحبا، هذا هو الصوت العربي لخادم piper."
+)
+normalize() {
+  local code=${1,,}
+  code=${code%%-*}
+  code=${code%%_*}
+  printf '%s\n' "$code"
+}
+installed_langs() {
+  local f
+  for f in "$VOICES_DIR"/*.onnx; do
+    [ -e "$f" ] || continue
+    normalize "$(basename "$f" .onnx)"
+  done | sort -u
+}
+voice_for() {
+  local f
+  for f in "$VOICES_DIR"/*.onnx; do
+    [ -e "$f" ] || continue
+    if [ "$(normalize "$(basename "$f" .onnx)")" = "$1" ]; then
+      basename "$f"
+      return 0
+    fi
+  done
+  return 1
+}
+name_of() {
+  local base=${1%%.onnx}
+  base=${base#*-}
+  base=${base%-*}
+  printf '%s\n' "${base,,}"
+}
+voice_installed() {
+  local wanted=${1,,} f name
+  local -a exact=() suffix=()
+  for f in "$VOICES_DIR"/*.onnx; do
+    [ -e "$f" ] || continue
+    name=$(name_of "$(basename "$f")")
+    if [ "$name" = "$wanted" ]; then
+      exact+=("$name")
+    elif [ "${name%_"$wanted"}" != "$name" ]; then
+      suffix+=("$name")
+    fi
+  done
+  if [ "${#exact[@]}" -gt 0 ]; then
+    return 0
+  fi
+  if [ "${#suffix[@]}" -gt 0 ]; then
+    local first=${suffix[0]}
+    for name in "${suffix[@]}"; do
+      [ "$name" = "$first" ] || return 1
+    done
+    return 0
+  fi
+  return 1
+}
+usage() {
+  printf "$(gettext 'usage: %s [language|all] [text] [-v|--voice NAME] [-d|--debug]')\n" "$(basename "$0")"
+  printf '%s\n' "$(gettext '  -v, --voice NAME    test that specific voice (thorsten, pau, upc_pau, ...)')"
+  printf '%s\n' "$(gettext '  -d, --debug          show piper-tts.service journal messages')"
+  printf "$(gettext 'test the Piper voices installed in %s')\n" "$VOICES_DIR"
+  exit 1
+}
+VOICE=""
+DEBUG=0
+JOURNAL_PID=""
+declare -a POSITIONALS=()
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -v | --voice)
+      [ $# -ge 2 ] || usage
+      VOICE=$2
+      shift 2
+      ;;
+    -d | --debug)
+      DEBUG=1
+      shift
+      ;;
+    --)
+      shift
+      POSITIONALS+=("$@")
+      break
+      ;;
+    -*)
+      usage
+      ;;
+    *)
+      POSITIONALS+=("$1")
+      shift
+      ;;
+  esac
+done
+if [ "${#POSITIONALS[@]}" -gt 0 ]; then
+  set -- "${POSITIONALS[@]}"
+else
+  set --
+fi
+start_journal() {
+  [ "$DEBUG" -eq 1 ] || return 0
+  if ! command -v journalctl >/dev/null 2>&1; then
+    printf '%s\n' "$(gettext 'WARNING: journalctl not found; server messages will not be shown')" >&2
+    return 0
+  fi
+  local since
+  since=$(date +%s)
+  if command -v stdbuf >/dev/null 2>&1; then
+    stdbuf -oL journalctl -u piper-tts.service --since="@$since" -f -o short-iso --grep='^(?!Schema error:)' 2>/dev/null &
+  else
+    journalctl -u piper-tts.service --since="@$since" -f -o short-iso --grep='^(?!Schema error:)' 2>/dev/null &
+  fi
+  JOURNAL_PID=$!
+  sleep 0.2
+  if ! kill -0 "$JOURNAL_PID" 2>/dev/null; then
+    if command -v stdbuf >/dev/null 2>&1; then
+      stdbuf -oL journalctl -u piper-tts.service --since="@$since" -f -o short-iso 2>/dev/null &
+    else
+      journalctl -u piper-tts.service --since="@$since" -f -o short-iso 2>/dev/null &
+    fi
+    JOURNAL_PID=$!
+    sleep 0.2
+  fi
+  if ! kill -0 "$JOURNAL_PID" 2>/dev/null; then
+    printf '%s\n' "$(gettext 'WARNING: could not read the piper-tts.service journal')" >&2
+    JOURNAL_PID=""
+  fi
+}
+stop_journal() {
+  if [ -n "${JOURNAL_PID:-}" ]; then
+    sleep 0.5
+    kill "$JOURNAL_PID" 2>/dev/null || true
+    wait "$JOURNAL_PID" 2>/dev/null || true
+    JOURNAL_PID=""
+  fi
+}
+trap stop_journal EXIT
+trap 'stop_journal; exit 130' INT
+trap 'stop_journal; exit 143' TERM
+play() {
+  local lang=$1 text=$2 file
+  if ! file=$(voice_for "$lang"); then
+    printf "$(gettext 'ERROR: language not installed: %s')\n" "$lang" >&2
+    return 1
+  fi
+  echo "== $lang ($file)"
+  if ! printf '%s\n' "$text" | "$CLIENT" --lang "$lang" --no-fallback; then
+    printf "$(gettext 'ERROR: %s did not play')\n" "$lang" >&2
+    return 1
+  fi
+}
+mapfile -t LANGS < <(installed_langs)
+if [ "${#LANGS[@]}" -eq 0 ]; then
+  printf "$(gettext 'WARNING: no voices installed in %s')\n" "$VOICES_DIR" >&2
+  printf '%s\n' "$(gettext 'install piper-tts-voices-* packages or copy .onnx and .onnx.json files')" >&2
+  exit 1
+fi
+if [ $# -ge 1 ]; then
+  target=$(normalize "$1")
+else
+  target=all
+fi
+if [ -n "$VOICE" ]; then
+  if ! voice_installed "$VOICE"; then
+    printf "$(gettext 'WARNING: voice not installed: %s (check spd-say -L or %s)')\n" "$VOICE" "$VOICES_DIR" >&2
+    exit 1
+  fi
+  if [ "$target" != all ] && ! voice_for "$target" >/dev/null; then
+    printf "$(gettext 'WARNING: language not installed: %s (available: %s)')\n" "$target" "${LANGS[*]}" >&2
+    exit 1
+  fi
+  if [ $# -ge 2 ]; then
+    text="${*:2}"
+  else
+    text="${SAMPLE[$target]:-1 2 3 4 5.}"
+  fi
+  lang_args=()
+  [ "$target" != all ] && lang_args=(--lang "$target")
+  echo "== voice $VOICE"
+  start_journal
+  if printf '%s\n' "$text" | "$CLIENT" --voice "$VOICE" "${lang_args[@]}" --no-fallback; then
+    printf "$(gettext 'OK: voice %s tested')\n" "$VOICE"
+    exit 0
+  fi
+  printf "$(gettext 'ERROR: voice %s failed')\n" "$VOICE" >&2
+  exit 1
+fi
+fail=0
+start_journal
+if [ "$target" = all ]; then
+  for l in "${LANGS[@]}"; do
+    play "$l" "${SAMPLE[$l]:-1 2 3 4 5.}" || fail=1
+  done
+else
+  case " ${LANGS[*]} " in
+    *" $target "*) ;;
+    *)
+      printf "$(gettext 'WARNING: language not installed: %s (available: %s)')\n" "$target" "${LANGS[*]}" >&2
+      exit 1
+      ;;
+  esac
+  if [ $# -ge 2 ]; then
+    text="${*:2}"
+  else
+    text="${SAMPLE[$target]:-1 2 3 4 5.}"
+  fi
+  play "$target" "$text" || fail=1
+fi
+if [ "$fail" -eq 0 ]; then
+  printf "$(gettext 'OK: test completed (%s voices installed)')\n" "${#LANGS[@]}"
+else
+  printf '%s\n' "$(gettext 'ERROR: some voice failed')" >&2
+fi
+exit "$fail"
