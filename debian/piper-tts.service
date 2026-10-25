@@ -14,6 +14,7 @@ Environment=PIPER_IDLE_SECONDS=900
 Environment=PIPER_MAX_LANGUAGES=2
 Environment=PIPER_SENTENCE_SILENCE=0.2
 Environment=PIPER_DEFAULT_LANG=auto
+Environment=PIPER_DEFAULT_RATE=-20
 Environment=PIPER_LOG_LEVEL=INFO
 TimeoutStopSec=10
 Restart=no
