@@ -1,6 +1,9 @@
 import logging
+import math
 import os
 from pathlib import Path
+
+DEFAULT_RATE = -20.0
 
 
 def setup_logging(level=None):
@@ -36,6 +39,30 @@ def sentence_silence():
 
 def max_languages():
     return int(os.environ.get("PIPER_MAX_LANGUAGES", "2"))
+
+
+def default_rate():
+    raw = os.environ.get("PIPER_DEFAULT_RATE")
+    if raw is None or raw.strip() == "":
+        return DEFAULT_RATE
+    try:
+        rate = float(raw)
+    except ValueError:
+        logging.getLogger(__name__).warning(
+            "Invalid PIPER_DEFAULT_RATE %r; using %s", raw, DEFAULT_RATE
+        )
+        return DEFAULT_RATE
+    if not math.isfinite(rate):
+        logging.getLogger(__name__).warning(
+            "Invalid PIPER_DEFAULT_RATE %r; using %s", raw, DEFAULT_RATE
+        )
+        return DEFAULT_RATE
+    if rate < -100.0 or rate > 100.0:
+        logging.getLogger(__name__).warning(
+            "PIPER_DEFAULT_RATE %r is outside -100..100; clamping", raw
+        )
+        rate = max(-100.0, min(100.0, rate))
+    return rate
 
 
 def default_lang():

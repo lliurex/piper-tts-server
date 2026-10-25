@@ -50,8 +50,8 @@ msgstr "Codi d'idioma (ca, es, ...)"
 msgid "Voice name (thorsten, lessac, upc_pau, ...; takes precedence over --lang)"
 msgstr "Nom de la veu (thorsten, lessac, upc_pau, ...; té prioritat sobre --lang)"
 
-msgid "Speed between -100 and +100"
-msgstr "Velocitat entre -100 i +100"
+msgid "Speed: slow (-40), normal (-20), fast (0), or a value from -100 to +100"
+msgstr "Velocitat: slow (-40), normal (-20), fast (0) o un valor entre -100 i +100"
 
 msgid "Volume between -100 and +100 (0 = normal)"
 msgstr "Volum entre -100 i +100 (0 = normal)"
@@ -95,11 +95,14 @@ msgstr "Segons d'inactivitat abans d'eixir (per defecte $PIPER_IDLE_SECONDS)"
 msgid "Maximum voices in LRU cache (default $PIPER_MAX_LANGUAGES)"
 msgstr "Màxim de veus en caché LRU (per defecte $PIPER_MAX_LANGUAGES)"
 
-msgid "usage: %s [language|all] [text] [-v|--voice NAME] [-d|--debug]"
-msgstr "ús: %s [idioma|all] [text] [-v|--voice NOM] [-d|--debug]"
+msgid "usage: %s [language|all] [text] [-v|--voice NAME] [-r|--rate RATE] [-d|--debug]"
+msgstr "ús: %s [idioma|all] [text] [-v|--voice NOM] [-r|--rate RATE] [-d|--debug]"
 
 msgid "  -v, --voice NAME    test that specific voice (thorsten, pau, upc_pau, ...)"
 msgstr "  -v, --voice NOM    prova eixa veu concreta (thorsten, pau, upc_pau, ...)"
+
+msgid "  -r, --rate RATE     slow (-40), normal (-20), fast (0), or -100..100"
+msgstr "  -r, --rate RATE     slow (-40), normal (-20), fast (0) o -100..100"
 
 msgid "  -d, --debug          show piper-tts.service journal messages"
 msgstr "  -d, --debug          mostra els missatges del journal de piper-tts.service"
@@ -142,3 +145,18 @@ msgstr "OK: prova completada (%s veus instal·lades)"
 
 msgid "ERROR: some voice failed"
 msgstr "ERROR: alguna veu ha fallat"
+
+msgid "invalid speed: %s"
+msgstr "velocitat no vàlida: %s"
+
+msgid "speed must be between -100 and +100"
+msgstr "la velocitat ha d'estar entre -100 i +100"
+
+msgid "== rate %s (%s)"
+msgstr "== velocitat %s (%s)"
+
+msgid "OK: rate %s tested"
+msgstr "OK: velocitat %s provada"
+
+msgid "ERROR: rate %s failed"
+msgstr "ERROR: la velocitat %s ha fallat"

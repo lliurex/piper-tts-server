@@ -50,6 +50,7 @@ def main(argv=None):
         max_languages=args.max_languages if args.max_languages is not None else util.max_languages(),
         sentence_silence=util.sentence_silence(),
         default_lang=util.default_lang(),
+        default_rate=util.default_rate(),
     )
     socket_path = Path(args.socket).expanduser() if args.socket else util.socket_path()
     return run(app, socket_path)

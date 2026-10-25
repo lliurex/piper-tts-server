@@ -72,14 +72,33 @@ voice_installed() {
   fi
   return 1
 }
+lang_for_voice() {
+  local wanted=${1,,} f name
+  for f in "$VOICES_DIR"/*.onnx; do
+    [ -e "$f" ] || continue
+    name=$(name_of "$(basename "$f")")
+    if [ "$name" = "$wanted" ] || [ "${name%_"$wanted"}" != "$name" ]; then
+      normalize "$(basename "$f" .onnx)"
+      return 0
+    fi
+  done
+  return 1
+}
+current_lang() {
+  local value=${LC_ALL:-${LC_MESSAGES:-${LANG:-}}}
+  [ -n "$value" ] || return 1
+  normalize "$value"
+}
 usage() {
-  printf "$(gettext 'usage: %s [language|all] [text] [-v|--voice NAME] [-d|--debug]')\n" "$(basename "$0")"
+  printf "$(gettext 'usage: %s [language|all] [text] [-v|--voice NAME] [-r|--rate RATE] [-d|--debug]')\n" "$(basename "$0")"
   printf '%s\n' "$(gettext '  -v, --voice NAME    test that specific voice (thorsten, pau, upc_pau, ...)')"
+  printf '%s\n' "$(gettext '  -r, --rate RATE     slow (-40), normal (-20), fast (0), or -100..100')"
   printf '%s\n' "$(gettext '  -d, --debug          show piper-tts.service journal messages')"
   printf "$(gettext 'test the Piper voices installed in %s')\n" "$VOICES_DIR"
   exit 1
 }
 VOICE=""
+RATE=""
 DEBUG=0
 JOURNAL_PID=""
 declare -a POSITIONALS=()
@@ -88,6 +107,11 @@ while [ $# -gt 0 ]; do
     -v | --voice)
       [ $# -ge 2 ] || usage
       VOICE=$2
+      shift 2
+      ;;
+    -r | --rate)
+      [ $# -ge 2 ] || usage
+      RATE=$2
       shift 2
       ;;
     -d | --debug)
@@ -112,6 +136,10 @@ if [ "${#POSITIONALS[@]}" -gt 0 ]; then
   set -- "${POSITIONALS[@]}"
 else
   set --
+fi
+RATE_ARGS=()
+if [ -n "$RATE" ]; then
+  RATE_ARGS=(--rate "$RATE")
 fi
 start_journal() {
   [ "$DEBUG" -eq 1 ] || return 0
@@ -160,10 +188,49 @@ play() {
     return 1
   fi
   echo "== $lang ($file)"
-  if ! printf '%s\n' "$text" | "$CLIENT" --lang "$lang" --no-fallback; then
+  if ! printf '%s\n' "$text" | "$CLIENT" --lang "$lang" "${RATE_ARGS[@]}" --no-fallback; then
     printf "$(gettext 'ERROR: %s did not play')\n" "$lang" >&2
     return 1
   fi
+}
+rate_sweep() {
+  local lang=$1 text=$2 rate
+  local fail=0
+  for rate in slow normal fast; do
+    printf "$(gettext '== rate %s (%s)')\n" "$rate" "$lang"
+    if [ -n "$VOICE" ]; then
+      if ! printf '%s\n' "$text" | "$CLIENT" --voice "$VOICE" --rate "$rate" --no-fallback; then
+        printf "$(gettext 'ERROR: rate %s failed')\n" "$rate" >&2
+        fail=1
+        continue
+      fi
+    else
+      if ! printf '%s\n' "$text" | "$CLIENT" --lang "$lang" --rate "$rate" --no-fallback; then
+        printf "$(gettext 'ERROR: rate %s failed')\n" "$rate" >&2
+        fail=1
+        continue
+      fi
+    fi
+    printf "$(gettext 'OK: rate %s tested')\n" "$rate"
+  done
+  return "$fail"
+}
+sweep_lang() {
+  if [ -n "$VOICE" ] && lang_for_voice "$VOICE"; then
+    return 0
+  fi
+  if [ "$target" != all ]; then
+    printf '%s\n' "$target"
+    return 0
+  fi
+  local current
+  current=$(current_lang || true)
+  if [ -n "$current" ]; then
+    case " ${LANGS[*]} " in
+      *" $current "*) printf '%s\n' "$current"; return 0 ;;
+    esac
+  fi
+  printf '%s\n' "${LANGS[0]}"
 }
 mapfile -t LANGS < <(installed_langs)
 if [ "${#LANGS[@]}" -eq 0 ]; then
@@ -194,7 +261,13 @@ if [ -n "$VOICE" ]; then
   [ "$target" != all ] && lang_args=(--lang "$target")
   echo "== voice $VOICE"
   start_journal
-  if printf '%s\n' "$text" | "$CLIENT" --voice "$VOICE" "${lang_args[@]}" --no-fallback; then
+  if printf '%s\n' "$text" | "$CLIENT" --voice "$VOICE" "${lang_args[@]}" "${RATE_ARGS[@]}" --no-fallback; then
+    if [ -z "$RATE" ]; then
+      sweep=$(sweep_lang)
+      if [ -n "$sweep" ]; then
+        rate_sweep "$sweep" "$text" || exit 1
+      fi
+    fi
     printf "$(gettext 'OK: voice %s tested')\n" "$VOICE"
     exit 0
   fi
@@ -221,6 +294,17 @@ else
     text="${SAMPLE[$target]:-1 2 3 4 5.}"
   fi
   play "$target" "$text" || fail=1
+fi
+if [ "$fail" -eq 0 ] && [ -z "$RATE" ]; then
+  sweep=$(sweep_lang)
+  if [ -n "$sweep" ]; then
+    if [ "$target" = all ]; then
+      sweep_text="${SAMPLE[$sweep]:-1 2 3 4 5.}"
+    else
+      sweep_text=$text
+    fi
+    rate_sweep "$sweep" "$sweep_text" || fail=1
+  fi
 fi
 if [ "$fail" -eq 0 ]; then
   printf "$(gettext 'OK: test completed (%s voices installed)')\n" "${#LANGS[@]}"
