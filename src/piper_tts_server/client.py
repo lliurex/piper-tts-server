@@ -358,6 +358,13 @@ def build_parser():
 
 
 def main(argv=None):
+    try:
+        return _main(argv)
+    except KeyboardInterrupt:
+        return 130
+
+
+def _main(argv=None):
     i18n.setup()
     args = build_parser().parse_args(argv)
     text = " ".join(args.text).strip() if args.text else sys.stdin.read().strip()
