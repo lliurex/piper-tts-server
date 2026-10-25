@@ -1,3 +1,9 @@
+piper-tts-server (1.0.2) jammy; urgency=medium
+
+  * Handle Ctrl+C in piper-tts-client without printing a Python traceback.
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Sun, 25 Oct 2026 17:30:00 +0100
+
 piper-tts-server (1.0.1) jammy; urgency=medium
 
   * Add PIPER_DEFAULT_RATE (default -20), rate presets in the client and
