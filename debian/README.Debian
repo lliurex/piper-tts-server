@@ -55,6 +55,8 @@ Environment variables set in the unit:
 - PIPER_MAX_LANGUAGES (2): maximum voices in the LRU cache.
 - PIPER_DEFAULT_LANG (auto): default language; auto derives it from the
   system locale (LANG/LC_*). A specific code (ca, es, ...) is also accepted.
+- PIPER_DEFAULT_RATE (-20): default speech rate when a request does not
+  specify one; valid values are -100..100.
 - PIPER_SENTENCE_SILENCE (0.2): silence between sentences, in seconds.
 - PIPER_LOG_LEVEL (INFO): log level.
 
@@ -79,6 +81,28 @@ that set SET_SYNTHESIS_VOICE (Firefox, etc.) work the same way. Direct
 equivalent:
 
     piper-tts-client --voice lessac --lang en
+
+Speech rate
+-----------
+The server uses -20 by default when a request does not include a rate. This
+is slightly slower than the historical normal speed. The value is configurable
+with the systemd environment variable PIPER_DEFAULT_RATE (-100..100), for
+example with a drop-in:
+
+    sudo systemctl edit piper-tts.service
+
+    [Service]
+    Environment=PIPER_DEFAULT_RATE=-30
+
+Explicit rates from clients and applications still take priority. The client
+accepts the presets slow (-40), normal (-20), fast (0), or a numeric value:
+
+    piper-tts-client --rate slow "Hola"
+    piper-tts-client -r fast "Hello"
+
+When piper-tts-test runs without --rate, it first tests the installed voices
+and then repeats the same text with slow, normal and fast in the selected
+language.
 
 Messages and translations
 -------------------------
@@ -129,7 +153,8 @@ Commands
 --------
 - /usr/bin/piper-tts-server: server (socket at /run/piper.sock).
 - /usr/bin/piper-tts-client: client (reads text from stdin, plays through
-  paplay; --voice option; libespeak-ng fallback if the server does not
+  paplay; --voice option; --rate accepts slow (-40), normal (-20), fast (0)
+  or a value from -100 to +100; libespeak-ng fallback if the server does not
   respond).
 - /usr/bin/piper-tts-test: tests the installation by playing a phrase with
   each installed voice (language, all; -v NAME for a specific voice; -d to
@@ -139,4 +164,6 @@ Commands
       piper-tts-test ca           # one voice
       piper-tts-test es "Hola"    # custom text
       piper-tts-test -v thorsten  # one specific voice
+      piper-tts-test --rate fast  # all voices at the fast preset
+      piper-tts-test -r slow -v thorsten  # one voice at the slow preset
       piper-tts-test -d           # all voices plus the journal
