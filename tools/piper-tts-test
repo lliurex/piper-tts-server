@@ -7,16 +7,19 @@ if ! command -v gettext >/dev/null 2>&1; then
   gettext() { printf '%s' "$1"; }
 fi
 VOICES_DIR="${PIPER_VOICES_DIR:-/usr/share/piper-voices}"
-CLIENT=/usr/bin/piper-tts-client
+CLIENT="${PIPER_TTS_CLIENT:-/usr/bin/piper-tts-client}"
+SLOW=-60
+NORMAL=-20
+FAST=30
 declare -A SAMPLE=(
-  [ca]="Hola, esta és la veu en valencià del servidor piper."
-  [es]="Hola, esta es la voz en español del servidor piper."
-  [de]="Hallo, das ist die deutsche Stimme des Piper-Servers."
-  [en]="Hello, this is the English voice of the piper server."
-  [fr]="Bonjour, ceci est la voix française du serveur piper."
-  [it]="Ciao, questa è la voce italiana del server piper."
-  [ru]="Привет, это русский голос сервера piper."
-  [ar]="مرحبا، هذا هو الصوت العربي لخادم piper."
+  [ca]="Hola, esta frase està escrita en valencià i prova la veu en valencià del servidor Piper."
+  [es]="Hola, esta frase está escrita en español y prueba la voz en español del servidor Piper."
+  [de]="Hallo, dieser Satz ist auf Deutsch geschrieben und testet die deutsche Stimme des Piper-Servers."
+  [en]="Hello, this sentence is written in English and tests the English voice of the Piper server."
+  [fr]="Bonjour, cette phrase est écrite en français et teste la voix française du serveur Piper."
+  [it]="Ciao, questa frase è scritta in italiano e prova la voce italiana del server Piper."
+  [ru]="Привет, это предложение написано на русском языке и проверяет русский голос сервера Piper."
+  [ar]="مرحبًا، هذه الجملة مكتوبة باللغة العربية وتختبر الصوت العربي لخادم Piper."
 )
 normalize() {
   local code=${1,,}
@@ -30,6 +33,24 @@ installed_langs() {
     [ -e "$f" ] || continue
     normalize "$(basename "$f" .onnx)"
   done | sort -u
+}
+list_languages() {
+  if [ -x "$CLIENT" ]; then
+    "$CLIENT" --list-languages
+  else
+    installed_langs
+  fi
+}
+list_voices() {
+  local f
+  if [ -x "$CLIENT" ]; then
+    "$CLIENT" --list-voices
+    return
+  fi
+  for f in "$VOICES_DIR"/*.onnx; do
+    [ -e "$f" ] || continue
+    basename "$f"
+  done
 }
 voice_for() {
   local f
@@ -90,20 +111,31 @@ current_lang() {
   normalize "$value"
 }
 usage() {
-  printf "$(gettext 'usage: %s [language|all] [text] [-v|--voice NAME] [-r|--rate RATE] [-d|--debug]')\n" "$(basename "$0")"
+  printf "$(gettext 'usage: %s [language|all] [text] [-l|--lang CODE] [-v|--voice NAME] [-r|--rate RATE|all] [--list-languages] [--list-voices] [-d|--debug]')\n" "$(basename "$0")"
+  printf '%s\n' "$(gettext '  -l, --lang CODE     test that specific language (ca, es, de, ...)')"
   printf '%s\n' "$(gettext '  -v, --voice NAME    test that specific voice (thorsten, pau, upc_pau, ...)')"
-  printf '%s\n' "$(gettext '  -r, --rate RATE     slow (-40), normal (-20), fast (0), or -100..100')"
+  printf '%s\n' "$(gettext '  -r, --rate RATE     slow (-60), normal (-20), fast (+30), all, or -100..100')"
+  printf '%s\n' "$(gettext '      --list-languages list available languages and exit')"
+  printf '%s\n' "$(gettext '      --list-voices    list available voices and exit')"
   printf '%s\n' "$(gettext '  -d, --debug          show piper-tts.service journal messages')"
   printf "$(gettext 'test the Piper voices installed in %s')\n" "$VOICES_DIR"
   exit 1
 }
 VOICE=""
+LANG_OPT=""
 RATE=""
 DEBUG=0
+LIST_LANGS=0
+LIST_VOICES=0
 JOURNAL_PID=""
 declare -a POSITIONALS=()
 while [ $# -gt 0 ]; do
   case "$1" in
+    -l | --lang)
+      [ $# -ge 2 ] || usage
+      LANG_OPT=$2
+      shift 2
+      ;;
     -v | --voice)
       [ $# -ge 2 ] || usage
       VOICE=$2
@@ -114,9 +146,20 @@ while [ $# -gt 0 ]; do
       RATE=$2
       shift 2
       ;;
+    --list-languages)
+      LIST_LANGS=1
+      shift
+      ;;
+    --list-voices)
+      LIST_VOICES=1
+      shift
+      ;;
     -d | --debug)
       DEBUG=1
       shift
+      ;;
+    -h | --help)
+      usage
       ;;
     --)
       shift
@@ -132,13 +175,20 @@ while [ $# -gt 0 ]; do
       ;;
   esac
 done
-if [ "${#POSITIONALS[@]}" -gt 0 ]; then
-  set -- "${POSITIONALS[@]}"
-else
-  set --
+if [ "$LIST_LANGS" -eq 1 ]; then
+  list_languages || exit 1
+  if [ "$LIST_VOICES" -eq 1 ]; then
+    printf '\n'
+  else
+    exit 0
+  fi
+fi
+if [ "$LIST_VOICES" -eq 1 ]; then
+  list_voices
+  exit $?
 fi
 RATE_ARGS=()
-if [ -n "$RATE" ]; then
+if [ -n "$RATE" ] && [ "$RATE" != all ]; then
   RATE_ARGS=(--rate "$RATE")
 fi
 start_journal() {
@@ -194,10 +244,14 @@ play() {
   fi
 }
 rate_sweep() {
-  local lang=$1 text=$2 rate
+  local lang=$1 text=$2 rate value i=0
+  local -a rates=(slow normal fast)
+  local -a values=("$SLOW" "$NORMAL" "$FAST")
   local fail=0
-  for rate in slow normal fast; do
-    printf "$(gettext '== rate %s (%s)')\n" "$rate" "$lang"
+  for rate in "${rates[@]}"; do
+    i=$((i + 1))
+    value=$(printf '%+d' "${values[$((i - 1))]}")
+    printf "$(gettext '[%d/%d] rate %s (%s): %s')\n" "$i" "${#rates[@]}" "$rate" "$value" "$lang"
     if [ -n "$VOICE" ]; then
       if ! printf '%s\n' "$text" | "$CLIENT" --voice "$VOICE" --rate "$rate" --no-fallback; then
         printf "$(gettext 'ERROR: rate %s failed')\n" "$rate" >&2
@@ -232,35 +286,70 @@ sweep_lang() {
   fi
   printf '%s\n' "${LANGS[0]}"
 }
+TEXT_ARGS=()
+if [ -n "$LANG_OPT" ]; then
+  target=$(normalize "$LANG_OPT")
+  TEXT_ARGS=("${POSITIONALS[@]}")
+else
+  if [ "${#POSITIONALS[@]}" -gt 0 ]; then
+    target=$(normalize "${POSITIONALS[0]}")
+    TEXT_ARGS=("${POSITIONALS[@]:1}")
+  else
+    target=all
+  fi
+fi
 mapfile -t LANGS < <(installed_langs)
 if [ "${#LANGS[@]}" -eq 0 ]; then
   printf "$(gettext 'WARNING: no voices installed in %s')\n" "$VOICES_DIR" >&2
   printf '%s\n' "$(gettext 'install piper-tts-voices-* packages or copy .onnx and .onnx.json files')" >&2
   exit 1
 fi
-if [ $# -ge 1 ]; then
-  target=$(normalize "$1")
-else
-  target=all
-fi
 if [ -n "$VOICE" ]; then
   if ! voice_installed "$VOICE"; then
     printf "$(gettext 'WARNING: voice not installed: %s (check spd-say -L or %s)')\n" "$VOICE" "$VOICES_DIR" >&2
     exit 1
   fi
-  if [ "$target" != all ] && ! voice_for "$target" >/dev/null; then
-    printf "$(gettext 'WARNING: language not installed: %s (available: %s)')\n" "$target" "${LANGS[*]}" >&2
+  voice_lang=$(lang_for_voice "$VOICE" || true)
+  if [ "$target" = all ]; then
+    [ -n "$voice_lang" ] && target=$voice_lang
+  elif [ -n "$voice_lang" ] && [ "$voice_lang" != "$target" ]; then
+    printf "$(gettext 'ERROR: voice %s belongs to language %s, not %s')\n" "$VOICE" "$voice_lang" "$target" >&2
     exit 1
   fi
-  if [ $# -ge 2 ]; then
-    text="${*:2}"
+fi
+if [ "$target" != all ] && ! voice_for "$target" >/dev/null; then
+  printf "$(gettext 'WARNING: language not installed: %s (available: %s)')\n" "$target" "${LANGS[*]}" >&2
+  exit 1
+fi
+if [ "${#TEXT_ARGS[@]}" -gt 0 ]; then
+  text="${TEXT_ARGS[*]}"
+else
+  text="${SAMPLE[$target]:-1 2 3 4 5.}"
+fi
+fail=0
+start_journal
+if [ "$RATE" = all ]; then
+  sweep=$(sweep_lang)
+  if [ "$target" = all ]; then
+    sweep_text="${SAMPLE[$sweep]:-1 2 3 4 5.}"
   else
-    text="${SAMPLE[$target]:-1 2 3 4 5.}"
+    sweep_text=$text
   fi
+  printf "$(gettext '== rate sweep (%s)')\n" "$sweep"
+  if ! rate_sweep "$sweep" "$sweep_text"; then
+    fail=1
+  fi
+  if [ "$fail" -eq 0 ]; then
+    printf "$(gettext 'OK: test completed (%s voices installed)')\n" "${#LANGS[@]}"
+  else
+    printf '%s\n' "$(gettext 'ERROR: some voice failed')" >&2
+  fi
+  exit "$fail"
+fi
+if [ -n "$VOICE" ]; then
   lang_args=()
   [ "$target" != all ] && lang_args=(--lang "$target")
   echo "== voice $VOICE"
-  start_journal
   if printf '%s\n' "$text" | "$CLIENT" --voice "$VOICE" "${lang_args[@]}" "${RATE_ARGS[@]}" --no-fallback; then
     if [ -z "$RATE" ]; then
       sweep=$(sweep_lang)
@@ -274,25 +363,11 @@ if [ -n "$VOICE" ]; then
   printf "$(gettext 'ERROR: voice %s failed')\n" "$VOICE" >&2
   exit 1
 fi
-fail=0
-start_journal
 if [ "$target" = all ]; then
   for l in "${LANGS[@]}"; do
     play "$l" "${SAMPLE[$l]:-1 2 3 4 5.}" || fail=1
   done
 else
-  case " ${LANGS[*]} " in
-    *" $target "*) ;;
-    *)
-      printf "$(gettext 'WARNING: language not installed: %s (available: %s)')\n" "$target" "${LANGS[*]}" >&2
-      exit 1
-      ;;
-  esac
-  if [ $# -ge 2 ]; then
-    text="${*:2}"
-  else
-    text="${SAMPLE[$target]:-1 2 3 4 5.}"
-  fi
   play "$target" "$text" || fail=1
 fi
 if [ "$fail" -eq 0 ] && [ -z "$RATE" ]; then
