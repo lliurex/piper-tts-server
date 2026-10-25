@@ -1,4 +1,4 @@
-piper-tts-server for Debian/Ubuntu jammy
+piper-tts-server for Debian/Ubuntu noble
 ========================================
 
 Dependency on piper-tts
@@ -95,14 +95,22 @@ example with a drop-in:
     Environment=PIPER_DEFAULT_RATE=-30
 
 Explicit rates from clients and applications still take priority. The client
-accepts the presets slow (-40), normal (-20), fast (0), or a numeric value:
+accepts the presets slow (-60), normal (-20), fast (+30), or a numeric
+value:
 
     piper-tts-client --rate slow "Hola"
     piper-tts-client -r fast "Hello"
 
+The client can also list the available languages and voices:
+
+    piper-tts-client --list-languages
+    piper-tts-client --list-voices
+
 When piper-tts-test runs without --rate, it first tests the installed voices
 and then repeats the same text with slow, normal and fast in the selected
-language.
+language. Use -r all to run only that enumerated sweep, and -l/--lang to
+select the language explicitly. Both commands accept --list-languages and
+--list-voices.
 
 Messages and translations
 -------------------------
@@ -153,17 +161,21 @@ Commands
 --------
 - /usr/bin/piper-tts-server: server (socket at /run/piper.sock).
 - /usr/bin/piper-tts-client: client (reads text from stdin, plays through
-  paplay; --voice option; --rate accepts slow (-40), normal (-20), fast (0)
-  or a value from -100 to +100; libespeak-ng fallback if the server does not
-  respond).
+  paplay; --voice option; --list-languages and --list-voices; --rate accepts
+  slow (-60), normal (-20), fast (+30) or a value from -100 to +100;
+  libespeak-ng fallback if the server does not respond).
 - /usr/bin/piper-tts-test: tests the installation by playing a phrase with
-  each installed voice (language, all; -v NAME for a specific voice; -d to
-  show the server journal; warns if no voice is available):
+  each installed voice (language, all; -l CODE for a specific language;
+  -v NAME for a specific voice; -r RATE|all; --list-languages and
+  --list-voices; -d to show the server journal; warns if no voice is
+  available):
 
       piper-tts-test              # all installed voices
-      piper-tts-test ca           # one voice
+      piper-tts-test ca           # one language
       piper-tts-test es "Hola"    # custom text
+      piper-tts-test -l de        # one language
       piper-tts-test -v thorsten  # one specific voice
-      piper-tts-test --rate fast  # all voices at the fast preset
+      piper-tts-test -r all -l de # enumerate slow, normal and fast
       piper-tts-test -r slow -v thorsten  # one voice at the slow preset
+      piper-tts-test --list-voices        # available voices
       piper-tts-test -d           # all voices plus the journal
