@@ -96,9 +96,27 @@ Runtime checks:
 ```bash
 piper-tts-test
 piper-tts-test -v thorsten
+piper-tts-test --rate fast
+piper-tts-test -r slow -v thorsten
 piper-tts-test -d
 piper-tts-test -d -v thorsten
 ```
+
+Without `--rate`, `piper-tts-test` also runs the same text with the `slow`,
+`normal` and `fast` presets in the selected language.
+
+### Default speech rate
+
+`PIPER_DEFAULT_RATE` controls the rate used when a request omits `rate`.
+The default is `-20`; valid values are `-100..100`.
+
+```bash
+PIPER_DEFAULT_RATE=-30 piper-tts-server
+```
+
+For the systemd unit, use a drop-in with
+`Environment=PIPER_DEFAULT_RATE=-30`. Explicit rates from clients and
+applications always take priority.
 
 For a source-tree smoke test without installing:
 
