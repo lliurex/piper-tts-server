@@ -39,6 +39,10 @@ Piper remains the synthesis engine. The server does not replace it.
   the next client starts it again automatically (socket activation).
 - **Memory-aware logs**: every voice load/unload, synthesis, start and exit
   records the current RSS.
+- **Configurable default rate**: `PIPER_DEFAULT_RATE` sets the speed used when
+  a request does not include an explicit `rate`; the default is `-20`.
+- **Rate presets**: the client accepts `slow` (-40), `normal` (-20), `fast`
+  (0), or a numeric value from -100 to +100.
 - **espeak-ng fallback**: if the server does not respond, the client
   synthesizes with `libespeak-ng` (ctypes) and plays through paplay, reporting
   the reason on stderr; if the library is missing, it uses
@@ -69,6 +73,7 @@ piper-tts.service on demand as a dynamic user
   voice does not exist, the language is used; if that does not match either,
   it returns 404 (`unknown_voice` / `unknown_language`) with the list of
   available locales.
+- If `rate` is omitted, the server uses `PIPER_DEFAULT_RATE` (default `-20`).
 - By default `/say` returns PCM data with `X-Sample-Rate`, `X-Bits: 16`,
   `X-Channels: 1` and `X-Voice` (resolved voice); the client runs
   `paplay --raw` with those parameters.
@@ -80,14 +85,55 @@ piper-tts.service on demand as a dynamic user
 piper-tts-client "Hello"                         # play through paplay
 echo "Hello" | piper-tts-client                  # text from stdin
 piper-tts-client --lang es --rate 20 "Hola"      # language and speed (-100..100)
+piper-tts-client --rate slow "Hola"               # preset: slow (-40)
+piper-tts-client -r fast "Hello"                 # preset: fast (0)
 piper-tts-client --volume 50 "Hello"             # volume -100..100 (0 = normal)
 piper-tts-client --voice thorsten "Hallo"        # specific voice (wins over language)
 piper-tts-client --stdout "Hello" > voice.pcm    # raw s16le PCM (no paplay)
 piper-tts-client --no-fallback "Hello"           # no espeak-ng fallback
-piper-tts-test                                   # test all installed voices
+piper-tts-test                                   # all voices + rate sweep
 piper-tts-test -v thorsten                       # test a specific voice
+piper-tts-test --rate fast                       # test all voices at fast
+piper-tts-test -r slow -v thorsten               # specific voice at slow
 piper-tts-test -d                                # also show the server journal
 piper-tts-test -d -v thorsten                    # journal + specific voice
+```
+
+### Speech rate
+
+`PIPER_DEFAULT_RATE` controls the speed used when neither the client nor the
+application requests a specific rate. The initial value is `-20`
+(approximately 20 % slower than the historical normal speed).
+
+To change it temporarily, start the server directly with:
+
+```bash
+PIPER_DEFAULT_RATE=-30 piper-tts-server
+```
+
+For the systemd service, use a drop-in:
+
+```bash
+sudo systemctl edit piper-tts.service
+```
+
+```ini
+[Service]
+Environment=PIPER_DEFAULT_RATE=-30
+```
+
+Then reload and restart:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart piper-tts.socket piper-tts.service
+```
+
+Explicit values still take priority:
+
+```bash
+piper-tts-client --rate fast "Hello"     # 0, normal historical speed
+piper-tts-client --rate -50 "Hello"      # slower than the default
 ```
 
 Via speech-dispatcher (the user daemon starts at login):

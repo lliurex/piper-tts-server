@@ -22,11 +22,14 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class TTSServer:
-    def __init__(self, voices_dir, idle_seconds, max_languages, sentence_silence, default_lang):
+    def __init__(
+        self, voices_dir, idle_seconds, max_languages, sentence_silence, default_lang, default_rate
+    ):
         self.voices_dir = Path(voices_dir)
         self.idle_seconds = idle_seconds
         self.sentence_silence = sentence_silence
         self.default_lang = default_lang
+        self.default_rate = default_rate
         self.voices = discover_voices(self.voices_dir)
         self.cache = VoiceCache(max_languages)
         self.synth_lock = threading.Lock()
@@ -36,10 +39,11 @@ class TTSServer:
         self._last_activity = time.monotonic()
         self.started = time.monotonic()
         _LOGGER.info(
-            "Voices available in %s: %s (RSS %.0f MB)",
+            "Voices available in %s: %s (RSS %.0f MB, default rate %s)",
             self.voices_dir,
             ", ".join(v.locale for v in self.voices) or "none",
             rss_mb(),
+            self.default_rate,
         )
 
     def request_started(self):
@@ -159,7 +163,9 @@ class _Handler(BaseHTTPRequestHandler):
             return
         lang = params.get("lang", [None])[0] or self.headers.get("X-Lang")
         voice_name = params.get("voice", [None])[0] or self.headers.get("X-Voice")
-        rate = params.get("rate", ["0"])[0]
+        rate = params.get("rate", [None])[0]
+        if rate is None or rate == "":
+            rate = app.default_rate
         volume = params.get("volume", ["0"])[0]
         fmt = params.get("format", ["raw"])[0].lower()
         voice, key = app.resolve(lang, voice_name)

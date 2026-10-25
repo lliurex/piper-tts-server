@@ -1,5 +1,6 @@
 import argparse
 import ctypes
+import math
 import shutil
 import signal
 import socket
@@ -13,6 +14,8 @@ from . import i18n
 from . import util
 
 _ = i18n.gettext
+
+_RATE_PRESETS = {"slow": -40.0, "normal": -20.0, "fast": 0.0}
 
 _ESPEAK_LIBS = ("libespeak-ng.so.1", "libespeak-ng.so")
 _ESPEAK_OUTPUT_SYNCHRONOUS = 2
@@ -293,6 +296,19 @@ def _fallback(text, lang, to_stdout):
     return _fallback_speak(text, lang)
 
 
+def _parse_rate(value):
+    token = value.strip().lower()
+    if token in _RATE_PRESETS:
+        return (_RATE_PRESETS[token], True)
+    try:
+        rate = float(token)
+    except ValueError:
+        raise argparse.ArgumentTypeError(_("invalid speed: %s") % value)
+    if not math.isfinite(rate) or rate < -100.0 or rate > 100.0:
+        raise argparse.ArgumentTypeError(_("speed must be between -100 and +100"))
+    return (rate, rate != 0)
+
+
 def build_parser():
     parser = argparse.ArgumentParser(
         prog="piper-tts-client",
@@ -308,7 +324,14 @@ def build_parser():
         help=_("Voice name (thorsten, lessac, upc_pau, ...; takes precedence over --lang)"),
     )
     parser.add_argument(
-        "--rate", type=float, default=0.0, help=_("Speed between -100 and +100")
+        "-r",
+        "--rate",
+        type=_parse_rate,
+        default=None,
+        metavar="RATE",
+        help=_(
+            "Speed: slow (-40), normal (-20), fast (0), or a value from -100 to +100"
+        ),
     )
     parser.add_argument(
         "--volume",
@@ -347,8 +370,10 @@ def main(argv=None):
         params.append(("voice", args.voice))
     if lang:
         params.append(("lang", lang))
-    if args.rate:
-        params.append(("rate", args.rate))
+    if args.rate is not None:
+        rate, send_rate = args.rate
+        if send_rate:
+            params.append(("rate", rate))
     if args.volume:
         params.append(("volume", args.volume))
     target = "/say"
