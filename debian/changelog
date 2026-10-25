@@ -1,3 +1,13 @@
+piper-tts-server (1.0.3) noble; urgency=medium
+
+  * Add --list-languages and --list-voices to piper-tts-client and
+    piper-tts-test.
+  * piper-tts-test: add -l/--lang, language-specific sample phrases and
+    -r all rate enumeration.
+  * Make slow/fast presets stronger: -60 and +30; keep the -20 default.
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Sun, 25 Oct 2026 20:45:00 +0100
+
 piper-tts-server (1.0.2) noble; urgency=medium
 
   * Handle Ctrl+C in piper-tts-client without printing a Python traceback.
