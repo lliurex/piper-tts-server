@@ -41,8 +41,10 @@ Piper remains the synthesis engine. The server does not replace it.
   records the current RSS.
 - **Configurable default rate**: `PIPER_DEFAULT_RATE` sets the speed used when
   a request does not include an explicit `rate`; the default is `-20`.
-- **Rate presets**: the client accepts `slow` (-40), `normal` (-20), `fast`
-  (0), or a numeric value from -100 to +100.
+- **Rate presets**: the client accepts `slow` (-60), `normal` (-20), `fast`
+  (+30), or a numeric value from -100 to +100.
+- **Voice discovery from the client**: `--list-languages` and
+  `--list-voices` show the languages and voices available in the server.
 - **espeak-ng fallback**: if the server does not respond, the client
   synthesizes with `libespeak-ng` (ctypes) and plays through paplay, reporting
   the reason on stderr; if the library is missing, it uses
@@ -85,15 +87,20 @@ piper-tts.service on demand as a dynamic user
 piper-tts-client "Hello"                         # play through paplay
 echo "Hello" | piper-tts-client                  # text from stdin
 piper-tts-client --lang es --rate 20 "Hola"      # language and speed (-100..100)
-piper-tts-client --rate slow "Hola"               # preset: slow (-40)
-piper-tts-client -r fast "Hello"                 # preset: fast (0)
+piper-tts-client --rate slow "Hola"               # preset: slow (-60)
+piper-tts-client -r fast "Hello"                 # preset: fast (+30)
 piper-tts-client --volume 50 "Hello"             # volume -100..100 (0 = normal)
 piper-tts-client --voice thorsten "Hallo"        # specific voice (wins over language)
+piper-tts-client --list-languages                # available languages
+piper-tts-client --list-voices                   # available voices
 piper-tts-client --stdout "Hello" > voice.pcm    # raw s16le PCM (no paplay)
 piper-tts-client --no-fallback "Hello"           # no espeak-ng fallback
 piper-tts-test                                   # all voices + rate sweep
+piper-tts-test -l de                             # test a specific language
 piper-tts-test -v thorsten                       # test a specific voice
-piper-tts-test --rate fast                       # test all voices at fast
+piper-tts-test -r all -l de                      # enumerate slow, normal and fast
+piper-tts-test --list-languages                  # available languages
+piper-tts-test --list-voices                     # available voices
 piper-tts-test -r slow -v thorsten               # specific voice at slow
 piper-tts-test -d                                # also show the server journal
 piper-tts-test -d -v thorsten                    # journal + specific voice
@@ -132,8 +139,10 @@ sudo systemctl restart piper-tts.socket piper-tts.service
 Explicit values still take priority:
 
 ```bash
-piper-tts-client --rate fast "Hello"     # 0, normal historical speed
-piper-tts-client --rate -50 "Hello"      # slower than the default
+piper-tts-client --rate slow "Hello"     # -60
+piper-tts-client --rate normal "Hello"   # -20
+piper-tts-client --rate fast "Hello"     # +30
+piper-tts-client --rate -50 "Hello"      # slower than normal, faster than slow
 ```
 
 Via speech-dispatcher (the user daemon starts at login):
@@ -199,6 +208,10 @@ unique suffix alias (`pau` -> `upc_pau`), case-insensitively. The names
 published by `spd-say -L` are those from `AddVoice` in `piper_sd.conf`
 (kareem, pau, thorsten, lessac, sharvard, siwis, paola, denis) and match the
 installed models. `GET /voices` exposes the `name` and `id` of each voice.
+
+Use `piper-tts-client --list-languages` for the language codes and
+`piper-tts-client --list-voices` for the voice table. Both commands are also
+available in `piper-tts-test`.
 
 ## Messages and translations
 
