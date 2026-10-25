@@ -95,15 +95,20 @@ Runtime checks:
 
 ```bash
 piper-tts-test
+piper-tts-test -l de
 piper-tts-test -v thorsten
-piper-tts-test --rate fast
+piper-tts-test -r all
+piper-tts-test -r all -l de
 piper-tts-test -r slow -v thorsten
+piper-tts-test --list-languages
+piper-tts-test --list-voices
 piper-tts-test -d
 piper-tts-test -d -v thorsten
 ```
 
-Without `--rate`, `piper-tts-test` also runs the same text with the `slow`,
-`normal` and `fast` presets in the selected language.
+Without `--rate`, `piper-tts-test` also runs the same text with the `slow`
+(-60), `normal` (-20) and `fast` (+30) presets in the selected language.
+`-r all` runs only that enumerated sweep.
 
 ### Default speech rate
 

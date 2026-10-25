@@ -1,5 +1,6 @@
 import argparse
 import ctypes
+import json
 import math
 import shutil
 import signal
@@ -15,7 +16,7 @@ from . import util
 
 _ = i18n.gettext
 
-_RATE_PRESETS = {"slow": -40.0, "normal": -20.0, "fast": 0.0}
+_RATE_PRESETS = {"slow": -60.0, "normal": -20.0, "fast": 30.0}
 
 _ESPEAK_LIBS = ("libespeak-ng.so.1", "libespeak-ng.so")
 _ESPEAK_OUTPUT_SYNCHRONOUS = 2
@@ -45,16 +46,16 @@ class ServerUnavailable(Exception):
     pass
 
 
-def _request(path, target, body, timeout):
+def _request(path, target, body="", timeout=120.0, method="POST"):
     payload = body.encode("utf-8")
-    request = (
-        f"POST {target} HTTP/1.0\r\n"
-        "Host: localhost\r\n"
-        "Content-Type: text/plain; charset=utf-8\r\n"
-        f"Content-Length: {len(payload)}\r\n"
-        "Connection: close\r\n"
-        "\r\n"
-    ).encode("ascii")
+    request = f"{method} {target} HTTP/1.0\r\nHost: localhost\r\n"
+    if method == "POST":
+        request += (
+            "Content-Type: text/plain; charset=utf-8\r\n"
+            f"Content-Length: {len(payload)}\r\n"
+        )
+    request += "Connection: close\r\n\r\n"
+    request = request.encode("ascii")
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     sock.settimeout(timeout)
     try:
@@ -296,6 +297,79 @@ def _fallback(text, lang, to_stdout):
     return _fallback_speak(text, lang)
 
 
+def _get_json(path, target, timeout):
+    sock, reader, status, headers = _request(path, target, "", timeout, method="GET")
+    try:
+        body = reader.read()
+    except OSError:
+        body = b""
+    finally:
+        try:
+            reader.close()
+        except OSError:
+            pass
+        sock.close()
+    if status != 200:
+        detail = body.decode("utf-8", errors="replace").strip()
+        raise ServerUnavailable(_("server HTTP %s: %s") % (status, detail[:300]))
+    try:
+        data = json.loads(body.decode("utf-8"))
+    except (UnicodeDecodeError, ValueError) as exc:
+        raise ServerUnavailable(_("invalid response from server: %s") % exc) from exc
+    if not isinstance(data, dict):
+        raise ServerUnavailable(_("invalid response from server"))
+    return data
+
+
+def _available_voices(args):
+    path = Path(args.socket).expanduser() if args.socket else util.socket_path()
+    try:
+        data = _get_json(path, "/voices", args.timeout)
+        available = data.get("available", [])
+        loaded = set(data.get("loaded", []))
+        if not isinstance(available, list):
+            raise ServerUnavailable(_("invalid response from server"))
+        return available, loaded
+    except ServerUnavailable:
+        from .voices import discover_voices
+
+        return [voice.as_dict() for voice in discover_voices(util.voices_dir())], set()
+
+
+def _list_languages(args):
+    voices, _loaded = _available_voices(args)
+    languages = sorted(
+        {
+            voice.get("lang") or str(voice.get("locale", "")).split("_")[0].lower()
+            for voice in voices
+            if voice.get("lang") or voice.get("locale")
+        }
+    )
+    if not languages:
+        print(_("piper-tts-client: no voices available"), file=sys.stderr)
+        return 1
+    for language in languages:
+        print(language)
+    return 0
+
+
+def _list_voices(args):
+    voices, loaded = _available_voices(args)
+    if not voices:
+        print(_("piper-tts-client: no voices available"), file=sys.stderr)
+        return 1
+    headers = (_("ID"), _("LANG"), _("VOICE"), _("QUALITY"), _("LOADED"))
+    print(f"{headers[0]:<28} {headers[1]:<6} {headers[2]:<12} {headers[3]:<10} {headers[4]}")
+    for voice in sorted(voices, key=lambda item: str(item.get("id", ""))):
+        voice_id = str(voice.get("id", ""))
+        language = str(voice.get("lang", ""))
+        name = str(voice.get("name", ""))
+        quality = str(voice.get("quality", ""))
+        marker = "*" if voice_id in loaded else ""
+        print(f"{voice_id:<28} {language:<6} {name:<12} {quality:<10} {marker}")
+    return 0
+
+
 def _parse_rate(value):
     token = value.strip().lower()
     if token in _RATE_PRESETS:
@@ -324,13 +398,23 @@ def build_parser():
         help=_("Voice name (thorsten, lessac, upc_pau, ...; takes precedence over --lang)"),
     )
     parser.add_argument(
+        "--list-languages",
+        action="store_true",
+        help=_("List available languages and exit"),
+    )
+    parser.add_argument(
+        "--list-voices",
+        action="store_true",
+        help=_("List available voices and exit"),
+    )
+    parser.add_argument(
         "-r",
         "--rate",
         type=_parse_rate,
         default=None,
         metavar="RATE",
         help=_(
-            "Speed: slow (-40), normal (-20), fast (0), or a value from -100 to +100"
+            "Speed: slow (-60), normal (-20), fast (+30), or a value from -100 to +100"
         ),
     )
     parser.add_argument(
@@ -367,6 +451,14 @@ def main(argv=None):
 def _main(argv=None):
     i18n.setup()
     args = build_parser().parse_args(argv)
+    if args.list_languages:
+        status = _list_languages(args)
+        if status != 0:
+            return status
+        if args.list_voices:
+            print()
+    if args.list_voices:
+        return _list_voices(args)
     text = " ".join(args.text).strip() if args.text else sys.stdin.read().strip()
     if not text:
         return 0
