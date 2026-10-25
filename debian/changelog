@@ -1,3 +1,12 @@
+piper-tts-server (1.0.4) noble; urgency=medium
+
+  * Unify voice listings: add --list for the full table and keep
+    --list-languages/--list-voices as one-line comma-separated lists.
+  * Fix the list commands so they exit without waiting for stdin.
+  * Document that CARGADA reflects the server LRU cache.
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Sun, 25 Oct 2026 21:45:00 +0100
+
 piper-tts-server (1.0.3) noble; urgency=medium
 
   * Add --list-languages and --list-voices to piper-tts-client and

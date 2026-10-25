@@ -101,16 +101,24 @@ value:
     piper-tts-client --rate slow "Hola"
     piper-tts-client -r fast "Hello"
 
-The client can also list the available languages and voices:
+The client can also list the available voices and languages:
 
-    piper-tts-client --list-languages
-    piper-tts-client --list-voices
+    piper-tts-client --list             # full voice table
+    piper-tts-client --list-languages   # ar,ca,de,...
+    piper-tts-client --list-voices      # kareem,upc_pau,thorsten,...
+
+The CARGADA column in --list is the server's current LRU cache: it marks the
+voices present in the loaded field of GET /voices. If the server is not
+reachable and the client uses the local filesystem fallback, it cannot know
+the cache state and leaves the column empty. The short list options print a
+single comma-separated line.
 
 When piper-tts-test runs without --rate, it first tests the installed voices
 and then repeats the same text with slow, normal and fast in the selected
 language. Use -r all to run only that enumerated sweep, and -l/--lang to
-select the language explicitly. Both commands accept --list-languages and
---list-voices.
+select the language explicitly. Both commands accept --list,
+--list-languages and --list-voices, and all list commands exit immediately
+without reading stdin.
 
 Messages and translations
 -------------------------
@@ -161,12 +169,12 @@ Commands
 --------
 - /usr/bin/piper-tts-server: server (socket at /run/piper.sock).
 - /usr/bin/piper-tts-client: client (reads text from stdin, plays through
-  paplay; --voice option; --list-languages and --list-voices; --rate accepts
-  slow (-60), normal (-20), fast (+30) or a value from -100 to +100;
+  paplay; --voice option; --list, --list-languages and --list-voices; --rate
+  accepts slow (-60), normal (-20), fast (+30) or a value from -100 to +100;
   libespeak-ng fallback if the server does not respond).
 - /usr/bin/piper-tts-test: tests the installation by playing a phrase with
   each installed voice (language, all; -l CODE for a specific language;
-  -v NAME for a specific voice; -r RATE|all; --list-languages and
+  -v NAME for a specific voice; -r RATE|all; --list, --list-languages and
   --list-voices; -d to show the server journal; warns if no voice is
   available):
 
@@ -177,5 +185,7 @@ Commands
       piper-tts-test -v thorsten  # one specific voice
       piper-tts-test -r all -l de # enumerate slow, normal and fast
       piper-tts-test -r slow -v thorsten  # one voice at the slow preset
-      piper-tts-test --list-voices        # available voices
+      piper-tts-test --list               # full voice table
+      piper-tts-test --list-languages     # comma-separated languages
+      piper-tts-test --list-voices        # comma-separated voice names
       piper-tts-test -d           # all voices plus the journal
