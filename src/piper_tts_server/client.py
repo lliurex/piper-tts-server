@@ -348,12 +348,28 @@ def _list_languages(args):
     if not languages:
         print(_("piper-tts-client: no voices available"), file=sys.stderr)
         return 1
-    for language in languages:
-        print(language)
+    print(",".join(languages))
     return 0
 
 
 def _list_voices(args):
+    voices, _loaded = _available_voices(args)
+    if not voices:
+        print(_("piper-tts-client: no voices available"), file=sys.stderr)
+        return 1
+    names = [
+        str(voice.get("name", ""))
+        for voice in sorted(voices, key=lambda item: str(item.get("id", "")))
+        if voice.get("name")
+    ]
+    if not names:
+        print(_("piper-tts-client: no voices available"), file=sys.stderr)
+        return 1
+    print(",".join(names))
+    return 0
+
+
+def _list_table(args):
     voices, loaded = _available_voices(args)
     if not voices:
         print(_("piper-tts-client: no voices available"), file=sys.stderr)
@@ -397,15 +413,21 @@ def build_parser():
         default=None,
         help=_("Voice name (thorsten, lessac, upc_pau, ...; takes precedence over --lang)"),
     )
-    parser.add_argument(
+    listing = parser.add_mutually_exclusive_group()
+    listing.add_argument(
+        "--list",
+        action="store_true",
+        help=_("List voices with language, quality and load state and exit"),
+    )
+    listing.add_argument(
         "--list-languages",
         action="store_true",
-        help=_("List available languages and exit"),
+        help=_("List language codes on one line separated by commas and exit"),
     )
-    parser.add_argument(
+    listing.add_argument(
         "--list-voices",
         action="store_true",
-        help=_("List available voices and exit"),
+        help=_("List voice names on one line separated by commas and exit"),
     )
     parser.add_argument(
         "-r",
@@ -451,12 +473,10 @@ def main(argv=None):
 def _main(argv=None):
     i18n.setup()
     args = build_parser().parse_args(argv)
+    if args.list:
+        return _list_table(args)
     if args.list_languages:
-        status = _list_languages(args)
-        if status != 0:
-            return status
-        if args.list_voices:
-            print()
+        return _list_languages(args)
     if args.list_voices:
         return _list_voices(args)
     text = " ".join(args.text).strip() if args.text else sys.stdin.read().strip()

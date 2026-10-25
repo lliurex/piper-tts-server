@@ -43,8 +43,10 @@ Piper remains the synthesis engine. The server does not replace it.
   a request does not include an explicit `rate`; the default is `-20`.
 - **Rate presets**: the client accepts `slow` (-60), `normal` (-20), `fast`
   (+30), or a numeric value from -100 to +100.
-- **Voice discovery from the client**: `--list-languages` and
-  `--list-voices` show the languages and voices available in the server.
+- **Voice discovery from the client**: `--list` shows the full voice table
+  (`id`, language, name, quality and LRU load state); `--list-languages` and
+  `--list-voices` print comma-separated language codes and short voice names
+  on a single line.
 - **espeak-ng fallback**: if the server does not respond, the client
   synthesizes with `libespeak-ng` (ctypes) and plays through paplay, reporting
   the reason on stderr; if the library is missing, it uses
@@ -91,16 +93,18 @@ piper-tts-client --rate slow "Hola"               # preset: slow (-60)
 piper-tts-client -r fast "Hello"                 # preset: fast (+30)
 piper-tts-client --volume 50 "Hello"             # volume -100..100 (0 = normal)
 piper-tts-client --voice thorsten "Hallo"        # specific voice (wins over language)
-piper-tts-client --list-languages                # available languages
-piper-tts-client --list-voices                   # available voices
+piper-tts-client --list                          # full voice table
+piper-tts-client --list-languages                # ar,ca,de,...
+piper-tts-client --list-voices                   # kareem,upc_pau,thorsten,...
 piper-tts-client --stdout "Hello" > voice.pcm    # raw s16le PCM (no paplay)
 piper-tts-client --no-fallback "Hello"           # no espeak-ng fallback
 piper-tts-test                                   # all voices + rate sweep
 piper-tts-test -l de                             # test a specific language
 piper-tts-test -v thorsten                       # test a specific voice
 piper-tts-test -r all -l de                      # enumerate slow, normal and fast
-piper-tts-test --list-languages                  # available languages
-piper-tts-test --list-voices                     # available voices
+piper-tts-test --list                            # full voice table
+piper-tts-test --list-languages                  # comma-separated languages
+piper-tts-test --list-voices                     # comma-separated voice names
 piper-tts-test -r slow -v thorsten               # specific voice at slow
 piper-tts-test -d                                # also show the server journal
 piper-tts-test -d -v thorsten                    # journal + specific voice
@@ -209,8 +213,10 @@ published by `spd-say -L` are those from `AddVoice` in `piper_sd.conf`
 (kareem, pau, thorsten, lessac, sharvard, siwis, paola, denis) and match the
 installed models. `GET /voices` exposes the `name` and `id` of each voice.
 
-Use `piper-tts-client --list-languages` for the language codes and
-`piper-tts-client --list-voices` for the voice table. Both commands are also
+Use `piper-tts-client --list` for the full table. The `CARGADA` column is the
+current server LRU cache (`/voices` field `loaded`), not a static property of
+the voice. `--list-languages` and `--list-voices` print comma-separated
+language codes and short voice names on one line. All three commands are also
 available in `piper-tts-test`.
 
 ## Messages and translations

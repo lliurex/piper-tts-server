@@ -38,7 +38,7 @@ list_languages() {
   if [ -x "$CLIENT" ]; then
     "$CLIENT" --list-languages
   else
-    installed_langs
+    installed_langs | paste -sd, -
   fi
 }
 list_voices() {
@@ -49,8 +49,16 @@ list_voices() {
   fi
   for f in "$VOICES_DIR"/*.onnx; do
     [ -e "$f" ] || continue
-    basename "$f"
-  done
+    name_of "$(basename "$f")"
+  done | paste -sd, -
+}
+list_table() {
+  if [ -x "$CLIENT" ]; then
+    "$CLIENT" --list
+    return
+  fi
+  printf "$(gettext 'ERROR: piper-tts-client not found: %s')\n" "$CLIENT" >&2
+  return 1
 }
 voice_for() {
   local f
@@ -111,12 +119,13 @@ current_lang() {
   normalize "$value"
 }
 usage() {
-  printf "$(gettext 'usage: %s [language|all] [text] [-l|--lang CODE] [-v|--voice NAME] [-r|--rate RATE|all] [--list-languages] [--list-voices] [-d|--debug]')\n" "$(basename "$0")"
+  printf "$(gettext 'usage: %s [language|all] [text] [-l|--lang CODE] [-v|--voice NAME] [-r|--rate RATE|all] [--list] [--list-languages] [--list-voices] [-d|--debug]')\n" "$(basename "$0")"
   printf '%s\n' "$(gettext '  -l, --lang CODE     test that specific language (ca, es, de, ...)')"
   printf '%s\n' "$(gettext '  -v, --voice NAME    test that specific voice (thorsten, pau, upc_pau, ...)')"
   printf '%s\n' "$(gettext '  -r, --rate RATE     slow (-60), normal (-20), fast (+30), all, or -100..100')"
-  printf '%s\n' "$(gettext '      --list-languages list available languages and exit')"
-  printf '%s\n' "$(gettext '      --list-voices    list available voices and exit')"
+  printf '%s\n' "$(gettext '      --list           show the combined voice table and exit')"
+  printf '%s\n' "$(gettext '      --list-languages list language codes on one line and exit')"
+  printf '%s\n' "$(gettext '      --list-voices    list voice names on one line and exit')"
   printf '%s\n' "$(gettext '  -d, --debug          show piper-tts.service journal messages')"
   printf "$(gettext 'test the Piper voices installed in %s')\n" "$VOICES_DIR"
   exit 1
@@ -125,6 +134,7 @@ VOICE=""
 LANG_OPT=""
 RATE=""
 DEBUG=0
+LIST_TABLE=0
 LIST_LANGS=0
 LIST_VOICES=0
 JOURNAL_PID=""
@@ -145,6 +155,10 @@ while [ $# -gt 0 ]; do
       [ $# -ge 2 ] || usage
       RATE=$2
       shift 2
+      ;;
+    --list)
+      LIST_TABLE=1
+      shift
       ;;
     --list-languages)
       LIST_LANGS=1
@@ -175,13 +189,18 @@ while [ $# -gt 0 ]; do
       ;;
   esac
 done
+list_count=$((LIST_TABLE + LIST_LANGS + LIST_VOICES))
+if [ "$list_count" -gt 1 ]; then
+  printf '%s\n' "$(gettext 'ERROR: use only one list option')" >&2
+  exit 1
+fi
+if [ "$LIST_TABLE" -eq 1 ]; then
+  list_table
+  exit $?
+fi
 if [ "$LIST_LANGS" -eq 1 ]; then
   list_languages || exit 1
-  if [ "$LIST_VOICES" -eq 1 ]; then
-    printf '\n'
-  else
-    exit 0
-  fi
+  exit 0
 fi
 if [ "$LIST_VOICES" -eq 1 ]; then
   list_voices

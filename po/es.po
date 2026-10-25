@@ -1,10 +1,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: piper-tts-server 1.0.3\n"
+"Project-Id-Version: piper-tts-server 1.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 20:22+0100\n"
-"PO-Revision-Date: 2026-10-25 18:00+0100\n"
+"POT-Creation-Date: 2026-10-25 20:36+0100\n"
+"PO-Revision-Date: 2026-10-25 21:30+0100\n"
 "Last-Translator: M.Angel Juan <m.angel.juan@gmail.com>\n"
 "Language-Team: Spanish\n"
 "Language: es\n"
@@ -66,109 +66,114 @@ msgstr "respuesta no válida del servidor: %s"
 msgid "invalid response from server"
 msgstr "respuesta no válida del servidor"
 
-#: src/piper_tts_server/client.py:349 src/piper_tts_server/client.py:359
+#: src/piper_tts_server/client.py:349 src/piper_tts_server/client.py:358
+#: src/piper_tts_server/client.py:366 src/piper_tts_server/client.py:375
 msgid "piper-tts-client: no voices available"
 msgstr "piper-tts-client: no hay voces disponibles"
 
-#: src/piper_tts_server/client.py:361
+#: src/piper_tts_server/client.py:377
 msgid "ID"
 msgstr "ID"
 
-#: src/piper_tts_server/client.py:361
+#: src/piper_tts_server/client.py:377
 msgid "LANG"
 msgstr "IDIOMA"
 
-#: src/piper_tts_server/client.py:361
+#: src/piper_tts_server/client.py:377
 msgid "VOICE"
 msgstr "VOZ"
 
-#: src/piper_tts_server/client.py:361
+#: src/piper_tts_server/client.py:377
 msgid "QUALITY"
 msgstr "CALIDAD"
 
-#: src/piper_tts_server/client.py:361
+#: src/piper_tts_server/client.py:377
 msgid "LOADED"
 msgstr "CARGADA"
 
-#: src/piper_tts_server/client.py:380
+#: src/piper_tts_server/client.py:396
 #, python-format
 msgid "invalid speed: %s"
 msgstr "velocidad no válida: %s"
 
-#: src/piper_tts_server/client.py:382
+#: src/piper_tts_server/client.py:398
 msgid "speed must be between -100 and +100"
 msgstr "la velocidad debe estar entre -100 y +100"
 
-#: src/piper_tts_server/client.py:389
+#: src/piper_tts_server/client.py:405
 msgid "Client for piper-tts-server (speech-dispatcher or direct use)"
 msgstr "Cliente de piper-tts-server (speech-dispatcher o uso directo)"
 
-#: src/piper_tts_server/client.py:392
+#: src/piper_tts_server/client.py:408
 msgid "Text to synthesize (reads from stdin if omitted)"
 msgstr "Texto a sintetizar (se lee de stdin si se omite)"
 
-#: src/piper_tts_server/client.py:394
+#: src/piper_tts_server/client.py:410
 msgid "Language code (ca, es, ...)"
 msgstr "Código de idioma (ca, es, ...)"
 
-#: src/piper_tts_server/client.py:398
+#: src/piper_tts_server/client.py:414
 msgid ""
 "Voice name (thorsten, lessac, upc_pau, ...; takes precedence over --lang)"
 msgstr ""
 "Nombre de la voz (thorsten, lessac, upc_pau, ...; tiene prioridad sobre "
 "--lang)"
 
-#: src/piper_tts_server/client.py:403
-msgid "List available languages and exit"
-msgstr "Lista los idiomas disponibles y sale"
+#: src/piper_tts_server/client.py:420
+msgid "List voices with language, quality and load state and exit"
+msgstr "Lista las voces con idioma, calidad y estado de carga y sale"
 
-#: src/piper_tts_server/client.py:408
-msgid "List available voices and exit"
-msgstr "Lista las voces disponibles y sale"
+#: src/piper_tts_server/client.py:425
+msgid "List language codes on one line separated by commas and exit"
+msgstr "Lista los códigos de idioma en una línea separada por comas y sale"
 
-#: src/piper_tts_server/client.py:417
+#: src/piper_tts_server/client.py:430
+msgid "List voice names on one line separated by commas and exit"
+msgstr "Lista los nombres de voz en una línea separada por comas y sale"
+
+#: src/piper_tts_server/client.py:439
 msgid ""
 "Speed: slow (-60), normal (-20), fast (+30), or a value from -100 to +100"
 msgstr ""
 "Velocidad: slow (-60), normal (-20), fast (+30) o un valor entre -100 y +100"
 
-#: src/piper_tts_server/client.py:424
+#: src/piper_tts_server/client.py:446
 msgid "Volume between -100 and +100 (0 = normal)"
 msgstr "Volumen entre -100 y +100 (0 = normal)"
 
-#: src/piper_tts_server/client.py:426
+#: src/piper_tts_server/client.py:448
 msgid "Unix socket path"
 msgstr "Ruta del socket Unix"
 
-#: src/piper_tts_server/client.py:430
+#: src/piper_tts_server/client.py:452
 msgid "Write raw s16le PCM to stdout (no paplay)"
 msgstr "Escribe PCM s16le crudo en stdout (sin paplay)"
 
-#: src/piper_tts_server/client.py:435
+#: src/piper_tts_server/client.py:457
 msgid "Do not use espeak-ng if the server does not respond"
 msgstr "No usar espeak-ng si el servidor no responde"
 
-#: src/piper_tts_server/client.py:438
+#: src/piper_tts_server/client.py:460
 msgid "Socket timeout in seconds"
 msgstr "Tiempo de espera del socket en segundos"
 
-#: src/piper_tts_server/client.py:485 src/piper_tts_server/client.py:523
+#: src/piper_tts_server/client.py:505 src/piper_tts_server/client.py:543
 #, python-format
 msgid "piper-tts-client: %s"
 msgstr "piper-tts-client: %s"
 
-#: src/piper_tts_server/client.py:488
+#: src/piper_tts_server/client.py:508
 #, python-format
 msgid "piper-tts-client: server unavailable, falling back to espeak-ng: %s"
 msgstr ""
 "piper-tts-client: servidor no disponible, usando fallback a espeak-ng: %s"
 
-#: src/piper_tts_server/client.py:504 src/piper_tts_server/client.py:516
+#: src/piper_tts_server/client.py:524 src/piper_tts_server/client.py:536
 #, python-format
 msgid "piper-tts-client: server HTTP %s: %s"
 msgstr "piper-tts-client: HTTP del servidor %s: %s"
 
-#: src/piper_tts_server/client.py:510
+#: src/piper_tts_server/client.py:530
 #, python-format
 msgid "piper-tts-client: falling back to espeak-ng (server HTTP %s: %s)"
 msgstr ""
@@ -198,117 +203,138 @@ msgstr ""
 msgid "Maximum voices in LRU cache (default $PIPER_MAX_LANGUAGES)"
 msgstr "Máximo de voces en caché LRU (por defecto $PIPER_MAX_LANGUAGES)"
 
-#: tools/piper-tts-test:114
+#: tools/piper-tts-test:60
+msgid "ERROR: piper-tts-client not found: %s"
+msgstr "ERROR: no se encontró piper-tts-client: %s"
+
+#: tools/piper-tts-test:122
 msgid ""
 "usage: %s [language|all] [text] [-l|--lang CODE] [-v|--voice NAME] "
-"[-r|--rate RATE|all] [--list-languages] [--list-voices] [-d|--debug]"
+"[-r|--rate RATE|all] [--list] [--list-languages] [--list-voices] "
+"[-d|--debug]"
 msgstr ""
 "uso: %s [idioma|all] [texto] [-l|--lang CÓDIGO] [-v|--voice NOMBRE] "
-"[-r|--rate RATE|all] [--list-languages] [--list-voices] [-d|--debug]"
+"[-r|--rate RATE|all] [--list] [--list-languages] [--list-voices] "
+"[-d|--debug]"
 
-#: tools/piper-tts-test:115
+#: tools/piper-tts-test:123
 msgid "  -l, --lang CODE     test that specific language (ca, es, de, ...)"
 msgstr "  -l, --lang CÓDIGO   prueba ese idioma concreto (ca, es, de, ...)"
 
-#: tools/piper-tts-test:116
+#: tools/piper-tts-test:124
 msgid ""
 "  -v, --voice NAME    test that specific voice (thorsten, pau, upc_pau, ...)"
 msgstr ""
 "  -v, --voice NOMBRE    prueba esa voz concreta (thorsten, pau, upc_pau, "
 "...)"
 
-#: tools/piper-tts-test:117
+#: tools/piper-tts-test:125
 msgid ""
 "  -r, --rate RATE     slow (-60), normal (-20), fast (+30), all, or "
 "-100..100"
 msgstr ""
 "  -r, --rate RATE     slow (-60), normal (-20), fast (+30), all o -100..100"
 
-#: tools/piper-tts-test:118
-msgid "      --list-languages list available languages and exit"
-msgstr "      --list-languages lista los idiomas disponibles y sale"
+#: tools/piper-tts-test:126
+msgid "      --list           show the combined voice table and exit"
+msgstr "      --list           muestra la tabla combinada de voces y sale"
 
-#: tools/piper-tts-test:119
-msgid "      --list-voices    list available voices and exit"
-msgstr "      --list-voices    lista las voces disponibles y sale"
+#: tools/piper-tts-test:127
+msgid "      --list-languages list language codes on one line and exit"
+msgstr ""
+"      --list-languages lista los códigos de idioma en una línea y sale"
 
-#: tools/piper-tts-test:120
+#: tools/piper-tts-test:128
+msgid "      --list-voices    list voice names on one line and exit"
+msgstr "      --list-voices    lista los nombres de voz en una línea y sale"
+
+#: tools/piper-tts-test:129
 msgid "  -d, --debug          show piper-tts.service journal messages"
 msgstr ""
 "  -d, --debug          muestra los mensajes del journal de piper-tts.service"
 
-#: tools/piper-tts-test:121
+#: tools/piper-tts-test:130
 msgid "test the Piper voices installed in %s"
 msgstr "prueba las voces Piper instaladas en %s"
 
-#: tools/piper-tts-test:197
+#: tools/piper-tts-test:194
+msgid "ERROR: use only one list option"
+msgstr "ERROR: usa solo una opción de listado"
+
+#: tools/piper-tts-test:216
 msgid "WARNING: journalctl not found; server messages will not be shown"
 msgstr ""
 "AVISO: no se ha encontrado journalctl; no se mostrarán los mensajes del "
 "servidor"
 
-#: tools/piper-tts-test:219
+#: tools/piper-tts-test:238
 msgid "WARNING: could not read the piper-tts.service journal"
 msgstr "AVISO: no se ha podido leer el journal de piper-tts.service"
 
-#: tools/piper-tts-test:237
+#: tools/piper-tts-test:256
 msgid "ERROR: language not installed: %s"
 msgstr "ERROR: idioma no instalado: %s"
 
-#: tools/piper-tts-test:242
+#: tools/piper-tts-test:261
 msgid "ERROR: %s did not play"
 msgstr "ERROR: %s no se reprodujo"
 
-#: tools/piper-tts-test:254
+#: tools/piper-tts-test:273
 msgid "[%d/%d] rate %s (%s): %s"
 msgstr "[%d/%d] velocidad %s (%s): %s"
 
-#: tools/piper-tts-test:257 tools/piper-tts-test:263
+#: tools/piper-tts-test:276 tools/piper-tts-test:282
 msgid "ERROR: rate %s failed"
 msgstr "ERROR: la velocidad %s falló"
 
-#: tools/piper-tts-test:268
+#: tools/piper-tts-test:287
 msgid "OK: rate %s tested"
 msgstr "OK: velocidad %s probada"
 
-#: tools/piper-tts-test:303
+#: tools/piper-tts-test:322
 msgid "WARNING: no voices installed in %s"
 msgstr "AVISO: no hay voces instaladas en %s"
 
-#: tools/piper-tts-test:304
+#: tools/piper-tts-test:323
 msgid "install piper-tts-voices-* packages or copy .onnx and .onnx.json files"
 msgstr ""
 "instala los paquetes piper-tts-voices-* o copia los ficheros .onnx y "
 ".onnx.json"
 
-#: tools/piper-tts-test:309
+#: tools/piper-tts-test:328
 msgid "WARNING: voice not installed: %s (check spd-say -L or %s)"
 msgstr "AVISO: voz no instalada: %s (consulta spd-say -L o %s)"
 
-#: tools/piper-tts-test:316
+#: tools/piper-tts-test:335
 msgid "ERROR: voice %s belongs to language %s, not %s"
 msgstr "ERROR: la voz %s pertenece al idioma %s, no a %s"
 
-#: tools/piper-tts-test:321
+#: tools/piper-tts-test:340
 msgid "WARNING: language not installed: %s (available: %s)"
 msgstr "AVISO: idioma no instalado: %s (disponibles: %s)"
 
-#: tools/piper-tts-test:338
+#: tools/piper-tts-test:357
 msgid "== rate sweep (%s)"
 msgstr "== barrido de velocidades (%s)"
 
-#: tools/piper-tts-test:343 tools/piper-tts-test:385
+#: tools/piper-tts-test:362 tools/piper-tts-test:404
 msgid "OK: test completed (%s voices installed)"
 msgstr "OK: prueba completada (%s voces instaladas)"
 
-#: tools/piper-tts-test:345 tools/piper-tts-test:387
+#: tools/piper-tts-test:364 tools/piper-tts-test:406
 msgid "ERROR: some voice failed"
 msgstr "ERROR: alguna voz falló"
 
-#: tools/piper-tts-test:360
+#: tools/piper-tts-test:379
 msgid "OK: voice %s tested"
 msgstr "OK: voz %s probada"
 
-#: tools/piper-tts-test:363
+#: tools/piper-tts-test:382
 msgid "ERROR: voice %s failed"
 msgstr "ERROR: la voz %s falló"
+
+#~ msgid "List available languages and exit"
+#~ msgstr "Lista los idiomas disponibles y sale"
+
+#~ msgid "List available voices and exit"
+#~ msgstr "Lista las voces disponibles y sale"
