@@ -1,0 +1,101 @@
+{
+  "type": "file",
+  "pkg_list": [
+    {
+      "name": "piper-tts-server",
+      "custom_icon": "piper-tts-server.png",
+      "custom_name": {
+        "en": "Piper TTS server (required)",
+        "es": "Servidor Piper TTS (necesario)",
+        "ca@valencia": "Servidor Piper TTS (necessari)"
+      },
+      "default_pkg": true
+    },
+    {
+      "name": "piper-tts-voices-ar",
+      "custom_icon": "piper-tts-voices.png",
+      "custom_name": {
+        "en": "Arabic voice (ar_JO-kareem-medium)",
+        "es": "Voz árabe (ar_JO-kareem-medium)",
+        "ca@valencia": "Veu àrab (ar_JO-kareem-medium)"
+      }
+    },
+    {
+      "name": "piper-tts-voices-ca",
+      "custom_icon": "piper-tts-voices.png",
+      "custom_name": {
+        "en": "Catalan voice (ca_ES-upc_pau-x_low)",
+        "es": "Voz catalana (ca_ES-upc_pau-x_low)",
+        "ca@valencia": "Veu catalana (ca_ES-upc_pau-x_low)"
+      }
+    },
+    {
+      "name": "piper-tts-voices-de",
+      "custom_icon": "piper-tts-voices.png",
+      "custom_name": {
+        "en": "German voice (de_DE-thorsten-medium)",
+        "es": "Voz alemana (de_DE-thorsten-medium)",
+        "ca@valencia": "Veu alemanya (de_DE-thorsten-medium)"
+      }
+    },
+    {
+      "name": "piper-tts-voices-en",
+      "custom_icon": "piper-tts-voices.png",
+      "custom_name": {
+        "en": "English voice (en_US-lessac-medium)",
+        "es": "Voz inglesa (en_US-lessac-medium)",
+        "ca@valencia": "Veu anglesa (en_US-lessac-medium)"
+      }
+    },
+    {
+      "name": "piper-tts-voices-es",
+      "custom_icon": "piper-tts-voices.png",
+      "custom_name": {
+        "en": "Spanish voice (es_ES-sharvard-medium)",
+        "es": "Voz española (es_ES-sharvard-medium)",
+        "ca@valencia": "Veu espanyola (es_ES-sharvard-medium)"
+      }
+    },
+    {
+      "name": "piper-tts-voices-fr",
+      "custom_icon": "piper-tts-voices.png",
+      "custom_name": {
+        "en": "French voice (fr_FR-siwis-medium)",
+        "es": "Voz francesa (fr_FR-siwis-medium)",
+        "ca@valencia": "Veu francesa (fr_FR-siwis-medium)"
+      }
+    },
+    {
+      "name": "piper-tts-voices-it",
+      "custom_icon": "piper-tts-voices.png",
+      "custom_name": {
+        "en": "Italian voice (it_IT-paola-medium)",
+        "es": "Voz italiana (it_IT-paola-medium)",
+        "ca@valencia": "Veu italiana (it_IT-paola-medium)"
+      }
+    },
+    {
+      "name": "piper-tts-voices-ru",
+      "custom_icon": "piper-tts-voices.png",
+      "custom_name": {
+        "en": "Russian voice (ru_RU-denis-medium)",
+        "es": "Voz rusa (ru_RU-denis-medium)",
+        "ca@valencia": "Veu russa (ru_RU-denis-medium)"
+      }
+    }
+  ],
+  "selection_enabled": {
+    "active": true,
+    "all_selected": false
+  },
+  "script": {
+    "name": "/usr/share/zero-lliurex-piper-tts-server/piper-tts-server_script",
+    "download": true,
+    "getStatus": true,
+    "remove": true
+  },
+  "custom_icon_path": "/usr/share/zero-lliurex-piper-tts-server/",
+  "zomando": "",
+  "check_zomando_state": false,
+  "required_root": true
+}
