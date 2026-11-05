@@ -1,3 +1,10 @@
+piper-tts-server (1.0.5) noble; urgency=medium
+
+  * Add zero-lliurex-piper-tts-server, a zero-center installer for the
+    Piper TTS server with selectable voice packages.
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Thu, 05 Nov 2026 18:30:00 +0100
+
 piper-tts-server (1.0.4) noble; urgency=medium
 
   * Unify voice listings: add --list for the full table and keep
