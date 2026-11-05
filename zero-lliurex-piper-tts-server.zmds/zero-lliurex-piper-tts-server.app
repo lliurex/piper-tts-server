@@ -1,4 +1,4 @@
-Name=Instalador de Piper TTS
+Name=zero-lliurex-piper-tts-server
 Name[es]=Instalador de Piper TTS
 Name[en]=Piper TTS installer
 Name[ca@valencia]=Instal·lador de Piper TTS
