@@ -1,0 +1,91 @@
+#!/bin/bash
+
+export TEXTDOMAIN=piper-tts-server
+_() { gettext "$1"; }
+
+ACTION="$1"
+shift
+PACKAGE_LIST="$*"
+
+has_pkg() {
+    [[ " $PACKAGE_LIST " == *" $1 "* ]]
+}
+
+pkg_installed() {
+    dpkg-query -W -f='${Status}' "$1" 2>/dev/null | grep -q "install ok installed"
+}
+
+ensure_server() {
+    if ! pkg_installed piper-tts-server; then
+        DEBIAN_FRONTEND=noninteractive \
+            apt-get install -y --no-install-recommends piper-tts-server
+    fi
+}
+
+installed_voices() {
+    dpkg-query -W -f='${Package} ${Status}\n' 'piper-tts-voices-*' 2>/dev/null \
+        | awk '$0 ~ /install ok installed/ {print $1}'
+}
+
+ask_remove_voices() {
+    local voices
+    voices="$(installed_voices)"
+    [ -n "$voices" ] || return 0
+    if kdialog --title "$(_ "Piper TTS")" --yesno \
+        "$(_ "Do you also want to remove the installed voices?")" 2>/dev/null; then
+        DEBIAN_FRONTEND=noninteractive apt-get remove -y $voices
+    fi
+}
+
+case "$ACTION" in
+    getStatus)
+        for pkg in "$@"; do
+            if pkg_installed "$pkg"; then echo 0; else echo 1; fi
+        done
+        exit 0
+        ;;
+    download)
+        exit 0
+        ;;
+    preInstall)
+        exit 0
+        ;;
+    installPackage)
+        rc=0
+        ensure_server || exit 1
+        for pkg in "$@"; do
+            case "$pkg" in
+                piper-tts-server)
+                    ;;
+                piper-tts-voices-*)
+                    DEBIAN_FRONTEND=noninteractive \
+                        apt-get install -y "$pkg" || rc=1
+                    ;;
+            esac
+        done
+        exit $rc
+        ;;
+    postInstall)
+        if pkg_installed piper-tts-server; then
+            zero-center set-configured zero-lliurex-piper-tts-server >/dev/null 2>&1 || true
+        fi
+        exit 0
+        ;;
+    remove)
+        rc=0
+        for pkg in "$@"; do
+            DEBIAN_FRONTEND=noninteractive apt-get remove -y "$pkg" || rc=1
+            if pkg_installed "$pkg"; then
+                rc=1
+            fi
+        done
+        if ! pkg_installed piper-tts-server; then
+            ask_remove_voices
+            zero-center set-non-configured zero-lliurex-piper-tts-server >/dev/null 2>&1 || true
+        fi
+        exit $rc
+        ;;
+    *)
+        exit 1
+        ;;
+esac

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+epi-gtk /usr/share/zero-lliurex-piper-tts-server/piper-tts.epi
+exit 0
