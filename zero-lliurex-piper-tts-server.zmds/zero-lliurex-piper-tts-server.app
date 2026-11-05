@@ -1,0 +1,17 @@
+Name=Instalador de Piper TTS
+Name[es]=Instalador de Piper TTS
+Name[en]=Piper TTS installer
+Name[ca@valencia]=Instal·lador de Piper TTS
+Name[qcv]=Instal·lador de Piper TTS
+Name[ca_ES]=Instal·lador de Piper TTS
+Comment=Local voice synthesis server
+Comment[es]=Servidor de síntesis de voz local
+Comment[ca@valencia]=Servidor de síntesi de veu local
+Comment[qcv]=Servidor de síntesi de veu local
+Comment[ca_ES]=Servidor de síntesi de veu local
+Icon=zero-lliurex-piper-tts-server
+Category=Software
+Service=True
+ScriptPath=zero-lliurex-piper-tts-server.zmd
+Using=pkexec
+Groups=sudo;admins;teachers
