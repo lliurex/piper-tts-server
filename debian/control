@@ -7,7 +7,9 @@ Build-Depends: debhelper-compat (= 13),
                pybuild-plugin-pyproject,
                python3-all,
                python3-setuptools,
-               gettext
+               gettext,
+               zero-dev,
+               llxsrchelper
 Standards-Version: 4.6.0
 Rules-Requires-Root: no
 
@@ -37,3 +39,15 @@ Description: Piper TTS server over a Unix socket
  .
  This package depends on piper-tts, speech-dispatcher, pulseaudio-utils and
  systemd, and configures speech-dispatcher and systemd to use the server.
+
+Package: zero-lliurex-piper-tts-server
+Architecture: all
+Section: x11
+Multi-Arch: foreign
+Depends: ${misc:Depends},
+         zero-center,
+         epi-gtk,
+         kdialog
+Description: Piper TTS server installer for zero-center
+ Zero-center helper that installs the Piper TTS server and lets the user
+ choose the voice packages.
