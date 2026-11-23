@@ -326,6 +326,14 @@ msgstr "OK: veu %s provada"
 msgid "ERROR: voice %s failed"
 msgstr "ERROR: la veu %s ha fallat"
 
+#: zero-lliurex-piper-tts-server.install-files/usr/share/zero-lliurex-piper-tts-server/piper-tts-server_script:34
+msgid "Piper TTS"
+msgstr "Piper TTS"
+
+#: zero-lliurex-piper-tts-server.install-files/usr/share/zero-lliurex-piper-tts-server/piper-tts-server_script:35
+msgid "Do you also want to remove the installed voices?"
+msgstr "Voleu eliminar també les veus instal·lades?"
+
 #~ msgid "List available languages and exit"
 #~ msgstr "Llista els idiomes disponibles i ix"
 

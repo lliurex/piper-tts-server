@@ -1,7 +1,7 @@
 #!/bin/bash
 
-export TEXTDOMAIN=piper-tts-server
-_() { gettext "$1"; }
+export TEXTDOMAIN=zero-lliurex-piper-tts-server
+_() { gettext -- "$1"; }
 
 ACTION="$1"
 shift
