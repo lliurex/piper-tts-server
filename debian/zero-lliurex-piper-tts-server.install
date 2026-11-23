@@ -1,1 +1,3 @@
-zero-lliurex-piper-tts-server.install-files/* /
+locale/zero-lliurex-piper-tts-server/ca/LC_MESSAGES/zero-lliurex-piper-tts-server.mo usr/share/locale/ca/LC_MESSAGES
+locale/zero-lliurex-piper-tts-server/es/LC_MESSAGES/zero-lliurex-piper-tts-server.mo usr/share/locale/es/LC_MESSAGES
+zero-lliurex-piper-tts-server.install-files/usr/share/zero-lliurex-piper-tts-server usr/share

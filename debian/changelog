@@ -1,3 +1,11 @@
+piper-tts-server (1.0.7) jammy; urgency=medium
+
+  * Ship static translations and translate the zero-center voice removal
+    prompt.
+  * Restore the zero-center assets in the Piper package.
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Mon, 23 Nov 2026 09:43:12 +0100
+
 piper-tts-server (1.0.6) jammy; urgency=medium
 
   * Make the Piper zero-center app stateless (Service=False); remove
