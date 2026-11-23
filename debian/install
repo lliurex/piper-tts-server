@@ -2,3 +2,5 @@ debian/piper-tts.service lib/systemd/system
 debian/piper-tts.socket lib/systemd/system
 debian/piper_sd.conf etc/speech-dispatcher/modules
 tools/piper-tts-test usr/bin
+locale/piper-tts-server/ca/LC_MESSAGES/piper-tts-server.mo usr/share/locale/ca/LC_MESSAGES
+locale/piper-tts-server/es/LC_MESSAGES/piper-tts-server.mo usr/share/locale/es/LC_MESSAGES

@@ -47,7 +47,8 @@ Multi-Arch: foreign
 Depends: ${misc:Depends},
          zero-center,
          epi-gtk,
-         kdialog
+         kdialog,
+         gettext-base
 Description: Piper TTS server installer for zero-center
  Zero-center helper that installs the Piper TTS server and lets the user
  choose the voice packages.
